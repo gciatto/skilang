@@ -1,0 +1,3 @@
+import skilang
+
+skilang.main()
