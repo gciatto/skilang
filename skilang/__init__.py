@@ -7,8 +7,10 @@ logger = logging.getLogger('skilang')
 
 
 class EvaluationError(Exception):
-    def __init__(self, formula, message=None):
-        msg = f"Error evaluating formula: {formula}"
+    def __init__(self, formula, message:str = None, assignments: dict = None):
+        msg = f"Error evaluating formula {formula}"
+        if assignments:
+            msg += f" with assignments {assignments}"
         if message:
             msg += f": {message}"
         super().__init__(msg)
@@ -21,7 +23,7 @@ class Formula:
         except EvaluationError:
             raise
         except Exception as e:
-            raise EvaluationError(self) from e
+            raise EvaluationError(self, assignments=kwargs) from e
     
     def _evaluate(self, **kwargs):
         raise NotImplementedError
@@ -183,15 +185,6 @@ class ArgsMixin:
 
 
 class Expression(Formula, ArgsMixin):
-    __operators_map ={
-        "+": "__add__",
-        "-": "__sub__",
-        "*": "__mul__",
-        "/": "__truediv__",
-        ".": "__getattr__",
-        "[]": "__getitem__",
-    }
-
     def __init__(self, operator: str, *args: Formula):
         self.operator = str(operator)
         ArgsMixin.__init__(self, *args)
@@ -229,12 +222,63 @@ class Expression(Formula, ArgsMixin):
     
     def __repr__(self):
         return f"{type(self).__name__}({self.operator!r}, {', '.join(map(repr, self.args))})"
+    
+    def __evaluate(self, operator: str, arity: int, first_arg: object, other_args: list, **kwargs):
+        if arity == 2:
+            second_arg = other_args[0]
+            if operator == '.':
+                return getattr(first_arg, second_arg)
+            elif operator == '[]':
+                return first_arg[second_arg]  # type: ignore[index]
+            elif operator == '+':
+                return first_arg + second_arg
+            elif operator == '-':
+                return first_arg - second_arg
+            elif operator == '*':
+                return first_arg * second_arg
+            elif operator == '/':
+                return first_arg / second_arg
+            elif operator == '//':
+                return first_arg // second_arg
+            elif operator == '%':
+                return first_arg % second_arg
+            elif operator == '**':
+                return first_arg ** second_arg
+            elif operator == '<<':
+                return first_arg << second_arg
+            elif operator == '>>':
+                return first_arg >> second_arg
+            elif operator == '&':
+                return first_arg & second_arg
+            elif operator == '|':
+                return first_arg | second_arg
+            elif operator == '^':
+                return first_arg ^ second_arg
+        elif arity == 1:
+            if operator == '~':
+                return ~first_arg # type: ignore[operator]
+            elif operator == '+':
+                return +first_arg # type: ignore[operator]
+            elif operator == '-':
+                return -first_arg # type: ignore[operator]
+        raise EvaluationError(self, f"Operator {operator} with arity {arity} is not supported")
+    
+    def __call__(self, *args):
+        arguments = list(self.args[:-1])
+        arguments.append(self.args[-1](*args))
+        return Expression(self.operator, *arguments)
 
     def _evaluate(self, **kwargs):
+        if self.operator in kwargs:
+            return kwargs[self.operator](*[arg.evaluate(**kwargs) for arg in self.args])
+        if self.arity == 2 and self.operator == '.' and isinstance(self.args[1], Predicate):
+            receiver = self.args[0].evaluate(**kwargs)
+            method = getattr(receiver, self.args[1].functor)
+            args = [arg.evaluate(**kwargs) for arg in self.args[1].args]
+            return method(*args)
         first = self.args[0].evaluate(**kwargs)
         others = [arg.evaluate(**kwargs) for arg in self.args[1:]]
-        method = self.__operators_map[self.operator] if self.operator in self.__operators_map else self.operator
-        return getattr(first, method)(*others)
+        return self.__evaluate(self.operator, self.arity, first, others, **kwargs)
         
 
 class Term(Formula):
@@ -354,12 +398,15 @@ class Predicate(Formula, ArgsMixin):
         return f"{self.functor}({', '.join(map(str, self.args))})"
     
     def __repr__(self):
-        return f"{type(self).__name__}({self.functor!r}, {', '.join(map(repr, self.args))})"
+        result = f"{type(self).__name__}({self.functor!r}"
+        if self.arity > 0:
+            result += f", {', '.join(map(repr, self.args))}"
+        return result + ")"
     
     def _evaluate(self, **kwargs):
         function = kwargs.get(self.functor)
         if function is None or not callable(function):
-            raise EvaluationError(self, f"No viable grounding for functor: {self.functor}")
+            raise EvaluationError(self, f"No viable grounding for functor: {self.functor}", kwargs)
         args = [arg.evaluate(**kwargs) for arg in self.args]
         return function(*args)
 

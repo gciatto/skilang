@@ -1,33 +1,6 @@
 import unittest
 from skilang import *
-from tests import all_permutations, permutations
-
-
-valid_expressions = {
-    r'a + b * c - d / e // f % d': 
-        Expression('-', Expression('+', Symbol('a'), Expression('*', Symbol('b'), Symbol('c'))), Expression('%', Expression('//', Expression('/', Symbol('d'), Symbol('e')), Symbol('f')), Symbol('d'))),
-    r'(a+b)*(c-d)/(e//(f%d))' : 
-        Expression('/', Expression('*', Expression('+', Symbol('a'), Symbol('b')), Expression('-', Symbol('c'), Symbol('d'))), Expression('//', Symbol('e'), Expression('%', Symbol('f'), Symbol('d')))),
-    f'x.y[0]': 
-        Expression('[]', Expression('.', Symbol('x'), Symbol('y')), Term(0)),
-    f'x.y[0].z': 
-        Expression('.', Expression('[]', Expression('.', Symbol('x'), Symbol('y')), Term(0)), Symbol('z')),
-    f'+x & -y | ~z': 
-        Expression('|', Expression('&', Expression('+', Symbol('x')), Expression('-', Symbol('y'))), Expression('~', Symbol('z'))),
-    f'f() + g(x) + h(y, z)':
-        Expression('+', Expression('+', Predicate('f', ), Predicate('g', Symbol('x'))), Predicate('h', Symbol('y'), Symbol('z'))),
-}
-
-
-def generate_formulas():
-    symbols = tuple(Symbol(s) for s in 'xy')
-    yield from symbols
-    terms = tuple(Term(i) for i in range(1))
-    yield from terms
-    predicates = tuple(Predicate(f, *args) for f in "fg" for args in all_permutations(symbols + terms))
-    yield from predicates
-    expressions = tuple(Expression(op, *args) for op in '+-' for args in permutations(symbols + terms + predicates, 2))
-    yield from expressions
+from tests import *
 
 
 class TestSkilangClasses(unittest.TestCase):
@@ -38,18 +11,18 @@ class TestSkilangClasses(unittest.TestCase):
         self.assertEqual(parsed, expected)
 
     def test_parse(self):
-        for input, expected in valid_expressions.items():
+        for input, expected in expressions.items():
             with self.subTest(input=input):
                 self._test_parse(input, expected)
 
     def test_repr(self):
-        for expression in valid_expressions.values():
+        for expression in expressions.values():
             string = repr(expression)
             with self.subTest(expression=string):
                 self.assertEqual(eval(string), expression)
 
     def test_str(self):
-        for expression in valid_expressions.values():
+        for expression in expressions.values():
             string = str(expression)
             with self.subTest(expression=string):
                 self.assertEqual(parse(string), expression)
@@ -69,3 +42,43 @@ class TestSkilangClasses(unittest.TestCase):
         random.shuffle(shuffled)
         shuffled.sort()
         self.assertEqual(ordered, shuffled)
+
+    def test_evaluate_arithmetic(self):
+        for string, expression in single_operator_expressions.items():
+            assignments = {'x': 1}
+            with self.subTest(expression=string, when=assignments):
+                expected = eval(string.replace('x', '1'))
+                actual = expression.evaluate(**assignments)
+                self.assertEqual(expected, actual)
+
+    def test_evaluate_access(self):
+        class X:
+            def __init__(self):
+                self.y = [1, 2, 3]
+            
+            def f(self, *args):
+                return 42 + sum(args)
+            
+        def inc(x):
+            return x + 1
+            
+        assignments = {'x': X(), 'a': 3, 'inc': inc}
+        expressions = {
+            'inc(a)': 4,
+            'x.y[0]': 1,
+            'x.y[1]': 2,
+            'x.y[2]': 3,
+            'x.f()': 42,
+            'x.f(1)': 43,
+            'x.f(1, 2)': 45,
+            'x.f(1, 2, a)': 48,
+            'x.f().to_bytes()': b'*',
+            'x.f(1).to_bytes()': b'+',
+            'x.f(1).to_bytes()[0]': 43,
+        }
+
+        for string, expected in expressions.items():
+            with self.subTest(expression=string, when=assignments):
+                expression = parse(string)
+                actual = expression.evaluate(**assignments)
+                self.assertEqual(expected, actual)
