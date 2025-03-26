@@ -243,7 +243,7 @@ class Term(Formula):
             raise ValueError("A Term's value cannot be a Formula")
         self.value = value
         self.symbol = symbol
-        if symbol is None and callable(value):
+        if symbol is None and hasattr(value, "__name__"):
             self.symbol = value.__name__
         if symbol is not None:
             self.symbol = str(symbol)
