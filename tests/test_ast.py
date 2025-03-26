@@ -22,7 +22,7 @@ expressions[r'(a + (b * c)) - (((d / e) // f) % d)'] = expressions[r'a + b * c -
 expressions[r'((a + b) * (c - d)) / (e // (f % d))'] = expressions[r'(a+b)*(c-d)/(e//(f%d))']
 
 
-class TestParsing(unittest.TestCase):
+class TestASTClasses(unittest.TestCase):
     maxDiff = None
 
     def _test_parse(self, input: str, expected: Formula):
