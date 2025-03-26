@@ -49,16 +49,16 @@ class Formula:
         return hash(tuple(self._attributes_to_hash()))
     
     def __lt__(self, other):
-        return self._compare(self, other) < 0
+        return self._compare(other) < 0
     
     def __le__(self, other):
-        return self._compare(self, other) <= 0
+        return self._compare(other) <= 0
     
     def __gt__(self, other):
-        return self._compare(self, other) > 0
+        return self._compare(other) > 0
     
     def __ge__(self, other):
-        return self._compare(self, other) >= 0
+        return self._compare(other) >= 0
 
     def __binary_expression(self, operator, other, reverse=False):
         other = self._force_formula(other)
