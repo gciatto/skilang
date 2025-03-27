@@ -10,6 +10,18 @@ class TestSkilangClasses(unittest.TestCase):
         parsed = parse(input)
         self.assertEqual(parsed, expected)
 
+    def test_parsing_comparison_operators(self):
+        for op in comparison_operators.keys():
+            with self.subTest(operator=op):
+                self._test_parse(f'x {op} 1', Expression(op, Symbol('x'), Term(1)))
+
+    def test_parsing_comparison_operators_term_first(self):
+        for op, parsed in comparison_operators.items():
+            expression = f'1 {op} x'
+            expected = Expression(parsed, Symbol('x'), Term(1))
+            with self.subTest(expression=expression, parsed_as=str(expected)):
+                self._test_parse(expression, expected)
+
     def test_parse(self):
         for input, expected in expressions.items():
             with self.subTest(input=input):
@@ -75,6 +87,12 @@ class TestSkilangClasses(unittest.TestCase):
             'x.f().to_bytes()': b'*',
             'x.f(1).to_bytes()': b'+',
             'x.f(1).to_bytes()[0]': 43,
+            'a == 3': True,
+            'inc(a) != 4': False,
+            'x.y[1] > 1': True,
+            'x.y[1] < 2': False,
+            'x.y[1] <= 2': True,
+            'x.y[1] >= 2': True,
         }
 
         for string, expected in expressions.items():
@@ -82,3 +100,12 @@ class TestSkilangClasses(unittest.TestCase):
                 expression = parse(string)
                 actual = expression.evaluate(**assignments)
                 self.assertEqual(expected, actual)
+
+    def test_evaluate_overriding_operator(self):
+        def minus(a, b, **assignments):
+            return a.evaluate(**assignments) - b.evaluate(**assignments)
+        
+        expr = parse('x + y')
+        assignments = {'x': 1, 'y': 2, '+': minus}
+        result = expr.evaluate(**assignments)
+        self.assertEqual(result, -1)

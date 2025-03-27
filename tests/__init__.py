@@ -24,12 +24,33 @@ meaningless_yet_valid_expressions = {
         Expression('+', Expression('+', Predicate('f', ), Predicate('g', Symbol('x'))), Predicate('h', Symbol('y'), Symbol('z'))),
     f'x.f(1)':
         Expression('.', Symbol('x'), Predicate('f', Term(1))),
+    f'x == y':
+        Expression('==', Symbol('x'), Symbol('y')),
+    f'x != y':
+        Expression('!=', Symbol('x'), Symbol('y')),
+    f'x < y':
+        Expression('<', Symbol('x'), Symbol('y')),
+    f'x <= y':
+        Expression('<=', Symbol('x'), Symbol('y')),
+    f'x > y':
+        Expression('>', Symbol('x'), Symbol('y')),
+    f'x >= y':
+        Expression('>=', Symbol('x'), Symbol('y')),
 }
 
 single_operator_expressions = {}
 
 binary_operators = list("+-*/%&|^") + ['//', '**', '<<', '>>']
 unary_operators = list("~+-")
+
+comparison_operators = {
+    '==': '==', 
+    '!=': '!=', 
+    '<': '>', 
+    '<=': '>=', 
+    '>': '<', 
+    '>=': '<=',
+}
 
 for op in binary_operators:
     single_operator_expressions[f'x {op} 1'] = Expression(op, Symbol('x'), Term(1))

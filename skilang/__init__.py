@@ -17,6 +17,19 @@ class EvaluationError(Exception):
 
 
 class Formula:
+    _comparison_operators = True
+
+    @classmethod
+    def _comparison_operators_as_builders(cls):
+        class Context:
+            def __enter__(self):
+                cls._comparison_operators = False
+                return cls
+            
+            def __exit__(self, exc_type, exc_value, traceback):
+                cls._comparison_operators = True
+        return Context()
+
     def evaluate(self, **kwargs):
         try:
             return self._evaluate(**kwargs)
@@ -45,22 +58,37 @@ class Formula:
         raise NotImplementedError
     
     def __eq__(self, other):
-        return self._check_equality(other)
+        if self._comparison_operators:
+            return self._check_equality(other)
+        return self.__binary_expression("==", other)
     
     def __hash__(self):
         return hash(tuple(self._attributes_to_hash()))
     
+    def __ne__(self, other):
+        if self._comparison_operators:
+            return not self._check_equality(other)
+        return self.__binary_expression("!=", other)
+    
     def __lt__(self, other):
-        return self._compare(other) < 0
+        if self._comparison_operators:
+            return self._compare(other) < 0
+        return self.__binary_expression("<", other)
     
     def __le__(self, other):
-        return self._compare(other) <= 0
+        if self._comparison_operators:
+            return self._compare(other) <= 0
+        return self.__binary_expression("<=", other)
     
     def __gt__(self, other):
-        return self._compare(other) > 0
+        if self._comparison_operators:
+            return self._compare(other) > 0
+        return self.__binary_expression(">", other)
     
     def __ge__(self, other):
-        return self._compare(other) >= 0
+        if self._comparison_operators:
+            return self._compare(other) >= 0
+        return self.__binary_expression(">=", other)
 
     def __binary_expression(self, operator, other, reverse=False):
         other = self._force_formula(other)
@@ -254,6 +282,18 @@ class Expression(Formula, ArgsMixin):
                 return first_arg | second_arg
             elif operator == '^':
                 return first_arg ^ second_arg
+            elif operator == '==':
+                return first_arg == second_arg
+            elif operator == '!=':
+                return first_arg != second_arg
+            elif operator == '<':
+                return first_arg < second_arg
+            elif operator == '<=':
+                return first_arg <= second_arg
+            elif operator == '>':
+                return first_arg > second_arg
+            elif operator == '>=':
+                return first_arg >= second_arg
         elif arity == 1:
             if operator == '~':
                 return ~first_arg # type: ignore[operator]
@@ -270,7 +310,7 @@ class Expression(Formula, ArgsMixin):
 
     def _evaluate(self, **kwargs):
         if self.operator in kwargs:
-            return kwargs[self.operator](*[arg.evaluate(**kwargs) for arg in self.args])
+            return kwargs[self.operator](*self.args, **kwargs)
         if self.arity == 2 and self.operator == '.' and isinstance(self.args[1], Predicate):
             receiver = self.args[0].evaluate(**kwargs)
             method = getattr(receiver, self.args[1].functor)
@@ -420,7 +460,8 @@ class SymbolProvider(typing.Dict[str, object]):
     
 
 def parse(string: str) -> Formula:
-    return eval(string, SymbolProvider())
+    with Formula._comparison_operators_as_builders():
+        return eval(string, SymbolProvider())
 
 
 # let this be the last line of this file
