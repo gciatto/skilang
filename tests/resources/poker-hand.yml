@@ -1,0 +1,176 @@
+data:
+  poker-hand:
+    training: &dataset
+      file: https://archive.ics.uci.edu/static/public/158/poker+hand.zip
+      unpack: poker-hand-training-true.data
+      type: csv(',')
+      percent: 80%
+    test: 
+      <<: *dataset
+      unpack: poker-hand-testing.data
+    features:
+      - in: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
+        values: &suits [hearts, spades, diamonds, clubs]
+      - in: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
+        values: &ranks [ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king]
+      - in: suit2 # ordinal (1-4) representing 
+        values: *suits
+      - in: rank2 # numerical (1-13) representing 
+        values: *ranks
+      - in: suit3 # ordinal (1-4) representing 
+        values: *suits
+      - in: rank3 # numerical (1-13) representing 
+        values: *ranks
+      - in: suit4 # ordinal (1-4) representing 
+        values: *suits
+      - in: rank4 # numerical (1-13) representing 
+        values: *ranks
+      - in: suit5 # ordinal (1-4) representing 
+        values: *suits
+      - in: rank5 # numerical (1-13) representing 
+        values: *ranks
+      - out: class
+        values:
+          - nothing # Nothing in hand; not a recognized poker hand 
+          - one_pair # One pair; one pair of equal ranks within five cards
+          - two_pairs # Two pairs; two pairs of equal ranks within five cards
+          - three_of_a_kind # Three of a kind; three equal ranks within five cards
+          - straight # Straight; five cards, sequentially ranked with no gaps
+          - flush # Flush; five cards with the same suit
+          - full_house # Full house; pair + different rank three of a kind
+          - four_of_a_kind # Four of a kind; four equal ranks within five cards
+          - straight_flush # Straight flush; straight + flush
+          - royal_flush # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
+      - group: suits
+        features: [suit1, suit2, suit3, suit4, suit5]
+      - group: ranks
+        features: [rank1, rank2, rank3, rank4, rank5]
+
+instances:
+  - hand: poker-hand
+
+optimization:
+  epochs: 100
+  # learning_rate: 0.001
+  loss: categorical_crossentropy
+  metrics: [accuracy]
+  batch_size: 128
+
+learnable:
+  PokerHand:
+    inputs:
+      - features.__inputs__
+    outputs:
+      - source: features.class
+        transform: one_hot_encoding
+    structure:
+      feed-forward:
+        layers:
+          - in: 256
+            activation: leaky_relu
+            regularization: l2
+            dropout: 0.2
+          - out: 10
+            activation: softmax 
+
+knowledge:
+  - rule: Pair
+    args: [hand]
+    # BETTER_RULE: min_repetitions(2, hand.ranks)
+    clause: |
+      hand[rank1] == hand[rank2] | hand[rank1] == hand[rank3] | hand[rank1] == hand[rank4] | hand[rank1] == hand[rank5] | 
+      hand[rank2] == hand[rank3] | hand[rank2] == hand[rank4] | hand[rank2] == hand[rank5] | hand[rank3] == hand[rank4] | hand[rank3] == hand[rank5] | hand[rank4] == hand[rank5]
+
+  - rule: Two_pairs
+    args: [hand]
+    # BETTER_RULE: min_true(2, (r1 == r2 for r1, r2 in combinations(hand.ranks, 2)))
+    clause: |
+      (hand[rank1] == hand[rank2] & (hand[rank3] == hand[rank4] | hand[rank3] == hand[rank5] | hand[rank4] == hand[rank5])) | 
+      (hand[rank1] == hand[rank3] & (hand[rank2] == hand[rank4] | hand[rank2] == hand[rank5] | hand[rank4] == hand[rank5])) |
+      (hand[rank1] == hand[rank4] & (hand[rank2] == hand[rank3] | hand[rank2] == hand[rank5] | hand[rank3] == hand[rank5])) |
+      (hand[rank1] == hand[rank5] & (hand[rank2] == hand[rank3] | hand[rank2] == hand[rank4] | hand[rank3] == hand[rank4]))
+
+  - rule: Three_of_a_kind
+    args: [hand]
+    # BETTER_RULE: min_repetitions(3, hand.ranks)
+    clause: |
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3]) |
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank4]) |
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank5]) |
+      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4]) |
+      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank5]) |
+      (hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) |
+      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank4]) |
+      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank5]) |
+      (hand[rank2] == hand[rank4] & hand[rank2] == hand[rank5]) |
+      (hand[rank3] == hand[rank4] & hand[rank3] == hand[rank5])
+
+  - rule: Straight
+    args: [hand]
+    # BETTER_RULE: min(hand.ranks) + 4 == max(hand.ranks)
+    # FIXME: the rule below will not work: there are no guarantees that the ranks are sorted
+    # FIXME: both rules are not adequate, because they do not consider the case {10, 11, 12, 13, 1}
+    clause: |
+      (hand[rank1] == hand[rank2] + 1 & hand[rank2] == hand[rank3] + 1 & hand[rank3] == hand[rank4] + 1 & hand[rank4] == hand[rank5] + 1) | 
+      (hand[rank1] == hand[rank2] - 1 & hand[rank2] == hand[rank3] - 1 & hand[rank3] == hand[rank4] - 1 & hand[rank4] == hand[rank5] - 1)
+
+  - rule: Flush
+    args: [hand]
+    # BETTER_RULE: min_repetitions(5, hand.suits)
+    # all_equal(hand.suits)
+    clause: (hand[suit1] == hand[suit2] & hand[suit1] == hand[suit3] & hand[suit1] == hand[suit4] & hand[suit1] == hand[suit5])
+
+  - rule: Full_house
+    args: [hand]
+    clause: (Three_of_a_kind(hand) & Pair(hand))
+
+  - rule: Four_of_a_kind
+    args: [hand]
+    # BETTER_RULE: min_repetitions(4, hand.ranks)
+    clause: |
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4]) |
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3] & hand[rank1] == hand[rank5]) |
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) |
+      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) |
+      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank4] & hand[rank2] == hand[rank5])
+
+  - rule: Straight_flush
+    args: [hand]
+    clause: (Straight(hand) & Flush(hand))
+
+  - rule: Royal_flush
+    args: [hand]
+    # BETTER_RULE: Straight_flush(hand) & contains(ace, hand.ranks)
+    # FIXME: the rule below will not work: it does not consider the case the case {10, 11, 12, 13, 1} (the rule above assumes that the case is handled by Straight)
+    clause: Straight_flush(hand) & (hand[rank1] == ace | hand[rank2] == ace | hand[rank3] == ace | hand[rank4] == ace | hand[rank5] == ace)
+
+constraints:
+  - PokerHand(hand) == hand[class]
+  
+  - iif: Royal_flush(hand)
+    then: PokerHand(hand) == royal_flush
+
+  # double implication is not adequate, because if Royal_flush(hand) is True, then Straight_flush(hand) is also True, yet PokerHand(hand) must output royal_flush
+  - if: Straight_flush(hand) 
+    then: PokerHand(hand) == straight_flush
+
+  - iif: Four_of_a_kind(hand)
+    then: PokerHand(hand) == four_of_a_kind
+
+  - iif: Full_house(hand)
+    then: PokerHand(hand) == full_house
+
+  - iif: Flush(hand)
+    then: PokerHand(hand) == flush
+
+  - if: Straight(hand)
+    then: PokerHand(hand) == straight
+
+  - if: Three_of_a_kind(hand)
+    then: PokerHand(hand) == three_of_a_kind
+
+  - iif: Two_pairs(hand)
+    then: PokerHand(hand) == two_pairs
+
+  - iif: Pair(hand)
+    then: PokerHand(hand) == one_pair
