@@ -85,9 +85,9 @@ jobs:
         shell: bash
         run: poetry run poe test
 
-  deploy:
-    name: Deploy
-    needs:
-      - test
-    uses: ./.github/workflows/deploy.yml
-    secrets: inherit
+  # deploy:
+  #   name: Deploy
+  #   needs:
+  #     - test
+  #   uses: ./.github/workflows/deploy.yml
+  #   secrets: inherit
