@@ -17,17 +17,23 @@ class EvaluationError(Exception):
 
 
 class Formula:
-    _comparison_operators = True
+    __comparison_operators_work_as_python_expects = True
 
     @classmethod
     def _comparison_operators_as_builders(cls):
+        def activate():
+            cls.__comparison_operators_work_as_python_expects = False
+
+        def deactivate():
+            cls.__comparison_operators_work_as_python_expects = True
+
         class Context:
             def __enter__(self):
-                cls._comparison_operators = False
+                activate()
                 return cls
             
             def __exit__(self, exc_type, exc_value, traceback):
-                cls._comparison_operators = True
+                deactivate()
         return Context()
 
     def evaluate(self, **kwargs):
@@ -58,7 +64,7 @@ class Formula:
         raise NotImplementedError
     
     def __eq__(self, other):
-        if self._comparison_operators:
+        if self.__comparison_operators_work_as_python_expects:
             return self._check_equality(other)
         return self.__binary_expression("==", other)
     
@@ -66,27 +72,27 @@ class Formula:
         return hash(tuple(self._attributes_to_hash()))
     
     def __ne__(self, other):
-        if self._comparison_operators:
+        if self.__comparison_operators_work_as_python_expects:
             return not self._check_equality(other)
         return self.__binary_expression("!=", other)
     
     def __lt__(self, other):
-        if self._comparison_operators:
+        if self.__comparison_operators_work_as_python_expects:
             return self._compare(other) < 0
         return self.__binary_expression("<", other)
     
     def __le__(self, other):
-        if self._comparison_operators:
+        if self.__comparison_operators_work_as_python_expects:
             return self._compare(other) <= 0
         return self.__binary_expression("<=", other)
     
     def __gt__(self, other):
-        if self._comparison_operators:
+        if self.__comparison_operators_work_as_python_expects:
             return self._compare(other) > 0
         return self.__binary_expression(">", other)
     
     def __ge__(self, other):
-        if self._comparison_operators:
+        if self.__comparison_operators_work_as_python_expects:
             return self._compare(other) >= 0
         return self.__binary_expression(">=", other)
 
