@@ -1,6 +1,6 @@
 import unittest
 from skilang import *
-from tests import *
+from tests import comparison_operators, expressions, generate_formulas, single_operator_expressions
 
 
 class TestSkilangClasses(unittest.TestCase):

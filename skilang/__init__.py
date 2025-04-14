@@ -1,6 +1,5 @@
 import logging
-import typing
-
+from typing import Self, Dict
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('skilang')
@@ -47,7 +46,7 @@ class Formula:
     def _evaluate(self, **kwargs):
         raise NotImplementedError
     
-    def _force_formula(self, value, symbol: bool = False) -> 'Formula':
+    def _force_formula(self, value, symbol: bool = False) -> Self:
         if isinstance(value, Formula):
             return value
         if symbol:
@@ -192,7 +191,7 @@ class Formula:
     
 
 class ArgsMixin:
-    def __init__(self, *args: 'Formula', min_arity: int = 1):
+    def __init__(self, *args: Formula, min_arity: int = 1):
         if len(args) < min_arity:
             raise ValueError(f"{type(self).__name__} must have at least {min_arity} argument{'s' if min_arity > 1 else ''}")
         for arg in args:
@@ -231,7 +230,7 @@ class Expression(Formula, ArgsMixin):
             all(a._check_equality(b) for a, b in zip(self.args, other.args))
     
     def _attributes_to_hash(self):
-        return (self.operator, *self.args)
+        return self.operator, *self.args
     
     def _compare(self, other):
         if not isinstance(other, Expression):
@@ -345,7 +344,7 @@ class Term(Formula):
             self.symbol == other.symbol
     
     def _attributes_to_hash(self):
-        return (self.value, self.symbol)
+        return self.value, self.symbol
     
     def _compare(self, other):
         if isinstance(other, Expression):
@@ -429,7 +428,7 @@ class Predicate(Formula, ArgsMixin):
             self._check_args_equality(other)
 
     def _attributes_to_hash(self):
-        return (self.functor, *self.args)
+        return self.functor, *self.args
     
     def _compare(self, other):
         if isinstance(other, Expression) or isinstance(other, Term) or isinstance(other, Symbol):
@@ -457,7 +456,7 @@ class Predicate(Formula, ArgsMixin):
         return function(*args)
 
 
-class SymbolProvider(typing.Dict[str, object]):
+class SymbolProvider(Dict[str, object]):
     def __getitem__(self, key):
         return Symbol(key)
     
