@@ -1,9 +1,9 @@
-from skilang import *
+from skilang import parse
 
 
 while True:
     try:
-        string = input('> ')
+        string = input("> ")
     except (EOFError, KeyboardInterrupt):
         break
     expression = parse(string)
