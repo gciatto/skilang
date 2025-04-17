@@ -1,11 +1,11 @@
-from skilang import *
+from skilang import parse
 
-
-while True:
-    try:
-        string = input('> ')
-    except (EOFError, KeyboardInterrupt):
-        break
-    expression = parse(string)
-    print("\t", str(expression))
-    print("\t", repr(expression))
+if __name__ == "__main__":
+    while True:
+        try:
+            string = input("> ")
+        except (EOFError, KeyboardInterrupt):
+            break
+        expression = parse(string)
+        print("\t", str(expression))
+        print("\t", f"{repr(expression)}, {type(expression)}")
