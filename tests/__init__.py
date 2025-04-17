@@ -90,13 +90,9 @@ def generate_formulas():
     yield from symbols
     terms = tuple(Term(i) for i in range(1))
     yield from terms
-    predicates = tuple(
-        Predicate(f, *args) for f in "fg" for args in all_permutations(symbols + terms)
-    )
+    predicates = tuple(Predicate(f, *args) for f in "fg" for args in all_permutations(symbols + terms))
     yield from predicates
     expressions = tuple(
-        Expression(op, *args)
-        for op in "+-"
-        for args in permutations(symbols + terms + predicates, 2)
+        Expression(op, *args) for op in "+-" for args in permutations(symbols + terms + predicates, 2)
     )
     yield from expressions

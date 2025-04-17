@@ -199,9 +199,7 @@ class ArgsMixin:
             )
         for arg in args:
             if not isinstance(arg, Formula):
-                raise ValueError(
-                    f"All arguments must be of type {Formula.__name__}, while {arg} is not"
-                )
+                raise ValueError(f"All arguments must be of type {Formula.__name__}, while {arg} is not")
         self.args = tuple(args)
 
     @property
@@ -209,9 +207,7 @@ class ArgsMixin:
         return len(self.args)
 
     def _check_args_equality(self, other: "ArgsMixin"):
-        return self.arity == other.arity and all(
-            a._check_equality(b) for a, b in zip(self.args, other.args)
-        )
+        return self.arity == other.arity and all(a._check_equality(b) for a, b in zip(self.args, other.args))
 
     def _compare_args(self, other: "ArgsMixin"):
         if self.arity != other.arity:
@@ -264,9 +260,7 @@ class Expression(Formula, ArgsMixin):
     def __repr__(self):
         return f"{type(self).__name__}({self.operator!r}, {', '.join(map(repr, self.args))})"
 
-    def __evaluate(
-        self, operator: str, arity: int, first_arg: object, other_args: list, **kwargs
-    ):
+    def __evaluate(self, operator: str, arity: int, first_arg: object, other_args: list, **kwargs):
         if arity == 2:
             second_arg = other_args[0]
             if operator == ".":
@@ -316,9 +310,7 @@ class Expression(Formula, ArgsMixin):
                 return +first_arg  # type: ignore[operator]
             elif operator == "-":
                 return -first_arg  # type: ignore[operator]
-        raise EvaluationError(
-            self, f"Operator {operator} with arity {arity} is not supported"
-        )
+        raise EvaluationError(self, f"Operator {operator} with arity {arity} is not supported")
 
     def __call__(self, *args):
         arguments = list(self.args[:-1])
@@ -328,11 +320,7 @@ class Expression(Formula, ArgsMixin):
     def _evaluate(self, **kwargs):
         if self.operator in kwargs:
             return kwargs[self.operator](*self.args, **kwargs)
-        if (
-            self.arity == 2
-            and self.operator == "."
-            and isinstance(self.args[1], Predicate)
-        ):
+        if self.arity == 2 and self.operator == "." and isinstance(self.args[1], Predicate):
             receiver = self.args[0].evaluate(**kwargs)
             method = getattr(receiver, self.args[1].functor)
             args = [arg.evaluate(**kwargs) for arg in self.args[1].args]
@@ -403,9 +391,7 @@ class Symbol(Formula):
             self.name = str(name)
 
     def _check_equality(self, other):
-        return (
-            other is not None and isinstance(other, Symbol) and self.name == other.name
-        )
+        return other is not None and isinstance(other, Symbol) and self.name == other.name
 
     def _attributes_to_hash(self):
         return (self.name,)
@@ -451,11 +437,7 @@ class Predicate(Formula, ArgsMixin):
         return self.functor, *self.args
 
     def _compare(self, other):
-        if (
-            isinstance(other, Expression)
-            or isinstance(other, Term)
-            or isinstance(other, Symbol)
-        ):
+        if isinstance(other, Expression) or isinstance(other, Term) or isinstance(other, Symbol):
             return 1
         if not isinstance(other, Predicate):
             return -1
@@ -475,9 +457,7 @@ class Predicate(Formula, ArgsMixin):
     def _evaluate(self, **kwargs):
         function = kwargs.get(self.functor)
         if function is None or not callable(function):
-            raise EvaluationError(
-                self, f"No viable grounding for functor: {self.functor}", kwargs
-            )
+            raise EvaluationError(self, f"No viable grounding for functor: {self.functor}", kwargs)
         args = [arg.evaluate(**kwargs) for arg in self.args]
         return function(*args)
 
