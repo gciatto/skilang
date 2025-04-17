@@ -64,7 +64,6 @@ single_operator_expressions = {}
 binary_operators = list("+-*/%&|^") + ["//", "**", "<<", ">>"]
 unary_operators = list("~+-")
 
-# FIXME: unused variable, is this a typo?
 comparison_operators = {
     "==": "==",
     "!=": "!=",

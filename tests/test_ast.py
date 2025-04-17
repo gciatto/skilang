@@ -1,4 +1,6 @@
 import unittest
+from typing import Dict
+
 from skilang import parse, Expression, Symbol, Term, Formula
 from tests import (
     comparison_operators,
@@ -6,6 +8,10 @@ from tests import (
     generate_formulas,
     single_operator_expressions,
 )
+
+# This is import all skilang classes into the context to be used in eval
+context: Dict = {}
+exec("from skilang import *", context)
 
 
 class TestSkilangClasses(unittest.TestCase):
@@ -36,7 +42,7 @@ class TestSkilangClasses(unittest.TestCase):
         for expression in expressions.values():
             string = repr(expression)
             with self.subTest(expression=string):
-                self.assertEqual(eval(string), expression)
+                self.assertEqual(eval(string, context), expression)
 
     def test_str(self):
         for expression in expressions.values():
@@ -64,7 +70,7 @@ class TestSkilangClasses(unittest.TestCase):
         for string, expression in single_operator_expressions.items():
             assignments = {"x": 1}
             with self.subTest(expression=string, when=assignments):
-                expected = eval(string.replace("x", "1"))
+                expected = eval(string.replace("x", "1"), context)
                 actual = expression.evaluate(**assignments)
                 self.assertEqual(expected, actual)
 
