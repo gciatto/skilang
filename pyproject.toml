@@ -24,6 +24,7 @@ behave = "^1.2.6"
 ruff = "^0.11.5"
 
 [tool.poe.tasks]
+bdd-test = "behave tests/features"
 test = "python -m unittest discover -v -s tests -p '*.py'"
 coverage = "coverage run -m unittest discover -v -s tests -p '*.py'"
 coverage-report = "coverage report -m"
