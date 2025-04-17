@@ -1,4 +1,5 @@
 from itertools import permutations
+
 from skilang import Expression, Symbol, Term, Predicate
 
 
