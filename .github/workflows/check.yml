@@ -34,7 +34,7 @@ jobs:
 
       - name: Static Checks
         shell: bash
-        run: poetry run poe mypy && poetry run poe ruff-check
+        run: poetry run poe static-checks
 
       - name: Test with Coverage
         shell: bash

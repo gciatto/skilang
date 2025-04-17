@@ -34,6 +34,10 @@ ruff-fix = "ruff check --fix"
 format = "ruff format"
 mypy = "mypy skilang tests"
 compile = "python -m compileall skilang tests"
+static-checks = [
+    "ruff-check",
+    "mypy",
+]
 
 [tool.poetry.scripts]
 skilang = "skilang:main"
