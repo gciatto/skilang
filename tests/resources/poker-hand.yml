@@ -107,7 +107,8 @@ knowledge:
 
   - rule: Straight
     args: [hand]
-    # BETTER_RULE: min_true(1, (r1 == r2 + 1 & r2 == r3 + 1 & r3 == r4 + 1 & r4 == r5 + 1 for r1, r2, r3, r4, r5 in permutations(hand.ranks, 5)))
+    # BETTER_RULE: min_true(1, ((r1 == r2 + 1 | r2 == r1 + 12) & r2 == r3 + 1 & r3 == r4 + 1 & r4 == r5 + 1 for r1, r2, r3, r4, r5 in permutations(hand.ranks, 5)))
+    # The better rule considers also the case {10, 11, 12, 13, 1}.
     # FIXME: the rule below will not work: there are no guarantees that the ranks are sorted
     # FIXME: both rules are not adequate, because they do not consider the case {10, 11, 12, 13, 1}
     clause: |
