@@ -1,8 +1,6 @@
-import logging
 from typing import Dict
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("skilang")
+from skilang.utils import logger
 
 
 class EvaluationError(Exception):
