@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Iterable
 
 from skilang.utils import logger
 
@@ -264,7 +264,12 @@ class Expression(Formula, ArgsMixin):
             if operator == ".":
                 return getattr(first_arg, second_arg)
             elif operator == "[]":
-                return first_arg[second_arg]  # type: ignore[index]
+                args = second_arg
+                if isinstance(second_arg, Iterable):
+                    args = tuple(
+                        [arg.evaluate(**kwargs) if isinstance(arg, Formula) else arg for arg in second_arg]
+                    )
+                return first_arg[args]  # type: ignore[index]
             elif operator == "+":
                 return first_arg + second_arg
             elif operator == "-":
