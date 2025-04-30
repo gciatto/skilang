@@ -21,3 +21,9 @@ Feature: Skilang vectors
     And the expression is evaluated
     Then the result should be the number "4"
 
+  Scenario: Multidimensional vector with slicing
+    Given the expression "v[:][1]"
+    And "v" defined as "[[1, 2], [3, 4, 5]]"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the vector "[3, 4, 5]"
