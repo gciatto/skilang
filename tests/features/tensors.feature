@@ -35,6 +35,14 @@ Feature: Skilang (pytorch) tensors handling
     And the expression is evaluated
     Then the result should be the tensor "tensor([3, 6])"
 
+  Scenario: Operation with tensor
+    Given the expression "t[:, i] + t[:, i]"
+    And "t" defined as "tensor([[1, 2, 3], [4, 5, 6]])"
+    And "i" defined as "2"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the tensor "tensor([6, 12])"
+
   Scenario: Tensor comparison
     Given the expression "t1[1:] == t2[1:]"
     And "t1" defined as "tensor([1, 2, 4])"
@@ -43,10 +51,18 @@ Feature: Skilang (pytorch) tensors handling
     And the expression is evaluated
     Then the result should be the tensor "tensor([True, False])"
 
-  Scenario: Tensor with variables as index
-    Given the expression "t[i]"
-    And "t" defined as "tensor([1, 2, 3])"
+  Scenario: Multidimensional tensor comparison
+    Given the expression "t[:, i] == t[:, i]"
+    And "t" defined as "tensor([[1, 2, 3], [4, 5, 6]])"
+    And "i" defined as "2"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the tensor "tensor([True, True])"
+
+  Scenario: Tridimensional tensor comparison
+    Given the expression "t[:, i, 0] == t[:, i, 0]"
+    And "t" defined as "tensor([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])"
     And "i" defined as "1"
     When the expression is parsed
     And the expression is evaluated
-    Then the result should be the number "2"
+    Then the result should be the tensor "tensor([True, True])"
