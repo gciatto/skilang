@@ -35,3 +35,13 @@ def step_function_result(context):
     if "result" not in context:
         raise ValueError("Actual result not provided.")
     assert isinstance(context.result, Predicate), f"Expected a function, but got {type(context.result)}"
+
+
+@then('the result should be the vector "{expected}"')
+def step_impl(context, expected: str):
+    """
+    :type context: behave.runner.Context
+    """
+    if "result" not in context:
+        raise ValueError("Actual result not provided.")
+    assert context.result == eval(expected), f"Expected {expected}, but got {context.result}"
