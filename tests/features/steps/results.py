@@ -1,3 +1,4 @@
+import torch
 from behave import use_step_matcher, then
 
 from skilang import Predicate
@@ -37,11 +38,24 @@ def step_function_result(context):
     assert isinstance(context.result, Predicate), f"Expected a function, but got {type(context.result)}"
 
 
-@then('the result should be the vector "{expected}"')
-def step_impl(context, expected: str):
+@then('the result should be the list "{expected}"')
+def step_list_result(context, expected: str):
     """
     :type context: behave.runner.Context
     """
     if "result" not in context:
         raise ValueError("Actual result not provided.")
     assert context.result == eval(expected), f"Expected {expected}, but got {context.result}"
+
+
+@then('the result should be the tensor "{expected}"')
+def step_tensor_result(context, expected: str):
+    """
+    :type context: behave.runner.Context
+    """
+    if "result" not in context:
+        raise ValueError("Actual result not provided.")
+    eval_context = {"tensor": torch.tensor}
+    assert torch.equal(context.result, eval(expected, eval_context)), (
+        f"Expected {expected}, but got {context.result}"
+    )
