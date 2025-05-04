@@ -74,5 +74,5 @@ logger.info(f"y_train: {Y_train}")
 # Creazione del DataLoader
 train_dataset = TensorDataset(X_train, Y_train)
 test_dataset = TensorDataset(X_test, Y_test)
-train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=512, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
