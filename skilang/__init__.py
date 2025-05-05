@@ -1,6 +1,7 @@
 from typing import Dict, Iterable
 
 from skilang.utils import logger
+import skilang.builtins as builtins
 
 
 class EvaluationError(Exception):
@@ -36,6 +37,12 @@ class Formula:
 
     def evaluate(self, **kwargs):
         try:
+            builtins_functions = {
+                name: func
+                for name, func in vars(builtins).items()
+                if callable(func) and not name.startswith("_")
+            }
+            kwargs.update(builtins_functions)
             return self._evaluate(**kwargs)
         except EvaluationError:
             raise
@@ -379,6 +386,8 @@ class Term(Formula):
     def _evaluate(self, **kwargs):
         if self.symbol is not None and self.symbol in kwargs:
             return kwargs[self.symbol]
+        if isinstance(self.value, Iterable):
+            return [arg.evaluate(**kwargs) if isinstance(arg, Formula) else arg for arg in self.value]
         return self.value
 
     def __call__(self, *args):

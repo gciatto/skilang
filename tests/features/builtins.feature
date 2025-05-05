@@ -1,0 +1,42 @@
+Feature: Skilang builtins
+
+  Scenario: Contains with list
+    Given the expression "contains([1, 2, 3, 4], 2)"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the boolean "True"
+
+  Scenario: Contains with tuple
+    Given the expression "contains((1, 2, 3, 4), 2)"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the boolean "True"
+
+  Scenario: Contains with tensor
+    Given the expression "contains(t, 2)"
+    And "t" defined as "tensor([1, 2, 3])"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the boolean "True"
+
+  Scenario: Contains with multidimensional tensor
+    Given the expression "contains(t, 2)"
+    And "t" defined as "tensor([[1, 2, 3], [4, 5, 6]])"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the tensor "tensor([True, False])"
+
+  Scenario: Concat two lists
+    Given the expression "concat([1, 2, 3], [4, 5, 6])"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the list "[1, 2, 3, 4, 5, 6]"
+
+  Scenario: Concat two tensors
+    Given the expression "concat(t1, t2)"
+    And "t1" defined as "tensor([1, 2, 3])"
+    And "t2" defined as "tensor([4, 5, 6])"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the tensor "tensor([1, 2, 3, 4, 5, 6])"
+

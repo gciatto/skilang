@@ -34,6 +34,6 @@ def step_expression_evaluated(context):
     if "parsed_exp" not in context:
         raise ValueError("Parsed expression not provided.")
     if "assignments" not in context:
-        raise ValueError("Assignments not provided.")
+        context.assignments = {}
     parsed: Formula = context.parsed_exp
     context.result = parsed.evaluate(**context.assignments)
