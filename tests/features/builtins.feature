@@ -1,20 +1,13 @@
 Feature: Skilang builtins
 
-  Scenario: Contains with list
-    Given the expression "contains([1, 2, 3, 4], 2)"
-    When the expression is parsed
-    And the expression is evaluated
-    Then the result should be the boolean "True"
-
-  Scenario: Contains with tuple
-    Given the expression "contains((1, 2, 3, 4), 2)"
+  Scenario: Contains with lists and tuples
+    Given the expression "contains([1, 2, 3, 4], 2) and contains((1, 2, 3, 4), 1)"
     When the expression is parsed
     And the expression is evaluated
     Then the result should be the boolean "True"
 
   Scenario: Contains with tensor
-    Given the expression "contains(t, 2)"
-    And "t" defined as "tensor([1, 2, 3])"
+    Given the expression "contains(tensor([1, 2, 3]), 2)"
     When the expression is parsed
     And the expression is evaluated
     Then the result should be the boolean "True"

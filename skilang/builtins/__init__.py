@@ -1,10 +1,15 @@
 import statistics
+import sys
 from collections.abc import Iterable
 from itertools import chain
-from typing import List
+from typing import List, Any
 
+import pandas as pd
 import torch
 from torch import Tensor
+
+tensor = torch.tensor
+DataFrame = pd.DataFrame
 
 
 def variance(iterable: List | Tensor) -> float | Tensor:
@@ -35,3 +40,8 @@ def concat(*args) -> List | Tensor:
         return list(chain(*args))
     else:
         raise TypeError
+
+
+def skilang_builtins_dict() -> dict[str, Any]:
+    current_module = sys.modules[__name__]
+    return {name: func for name, func in vars(current_module).items() if not name.startswith("_")}

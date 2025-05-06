@@ -1,10 +1,8 @@
 from typing import Callable
 
-import pandas as pd
-import torch
 from behave import use_step_matcher, given, when
 
-from skilang import Formula
+from skilang import Formula, skilang_builtins_dict
 
 use_step_matcher("parse")
 
@@ -17,8 +15,7 @@ def step_assignment(context, name: str, definition: str):
     :param definition: the assignment definition
     :return:
     """
-    eval_context = {"DataFrame": pd.DataFrame, "tensor": torch.tensor}
-    obj: Callable = eval(definition, eval_context)
+    obj: Callable = eval(definition, skilang_builtins_dict())
 
     if "assignments" not in context:
         context.assignments = {name: obj}

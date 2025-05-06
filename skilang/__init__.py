@@ -1,7 +1,7 @@
 from typing import Dict, Iterable
 
 from skilang.utils import logger
-import skilang.builtins as builtins
+from skilang.builtins import skilang_builtins_dict
 
 
 class EvaluationError(Exception):
@@ -37,12 +37,7 @@ class Formula:
 
     def evaluate(self, **kwargs):
         try:
-            builtins_functions = {
-                name: func
-                for name, func in vars(builtins).items()
-                if callable(func) and not name.startswith("_")
-            }
-            kwargs.update(builtins_functions)
+            kwargs.update(skilang_builtins_dict())
             return self._evaluate(**kwargs)
         except EvaluationError:
             raise
