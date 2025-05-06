@@ -386,7 +386,7 @@ class Term(Formula):
     def _evaluate(self, **kwargs):
         if self.symbol is not None and self.symbol in kwargs:
             return kwargs[self.symbol]
-        if isinstance(self.value, Iterable):
+        if isinstance(self.value, Iterable) and not isinstance(self.value, str):
             return [arg.evaluate(**kwargs) if isinstance(arg, Formula) else arg for arg in self.value]
         return self.value
 
