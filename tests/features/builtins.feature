@@ -40,3 +40,16 @@ Feature: Skilang builtins
     And the expression is evaluated
     Then the result should be the tensor "tensor([1, 2, 3, 4, 5, 6])"
 
+  Scenario: Variance of a tensor
+    Given the expression "variance(t)"
+    And "t" defined as "tensor([1, 2, 3])"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the number "1"
+
+  Scenario: Variance of a list
+    Given the expression "variance([1, 2, 3, 4, 5])"
+    When the expression is parsed
+    And the expression is evaluated
+    Then the result should be the number "2.5"
+

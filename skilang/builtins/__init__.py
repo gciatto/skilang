@@ -1,23 +1,28 @@
+import statistics
 from collections.abc import Iterable
 from itertools import chain
 from typing import List
 
 import torch
-from torch import cat, Tensor
+from torch import Tensor
 
 
-def variance(tensors: List[Tensor]) -> Tensor:
-    dim: int = 0 if tensors[0].dim() == 1 else 1
-    return cat(tensors, dim=1).var(dim=dim)
+def variance(iterable: List | Tensor) -> float | Tensor:
+    if isinstance(iterable, List):
+        return statistics.variance(iterable)
+    elif isinstance(iterable, Tensor):
+        dim: int = 1 if iterable.ndim > 1 else 0
+        return torch.var(iterable.to(torch.float), dim=dim)
+    else:
+        raise TypeError(f"unsupported type {type(iterable)}")
 
 
-def contains(iterables: List | Tensor, value: int) -> bool | Tensor:
-    print(iterables)
-    if isinstance(iterables, List):
-        return value in set(iterables)
-    elif isinstance(iterables, Tensor):
-        dim: int = 1 if iterables.ndim > 1 else 0
-        return torch.any(iterables == value, dim=dim)
+def contains(iterable: List | Tensor, value: int) -> bool | Tensor:
+    if isinstance(iterable, List):
+        return value in set(iterable)
+    elif isinstance(iterable, Tensor):
+        dim: int = 1 if iterable.ndim > 1 else 0
+        return torch.any(iterable == value, dim=dim)
     else:
         raise TypeError
 
