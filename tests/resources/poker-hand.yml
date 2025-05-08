@@ -78,85 +78,85 @@ knowledge:
     args: [hand]
     # BETTER_RULE: min_repetitions(2, hand.ranks)
     clause: |
-      hand[rank1] == hand[rank2] or hand[rank1] == hand[rank3] or hand[rank1] == hand[rank4] or hand[rank1] == hand[rank5] or 
-      hand[rank2] == hand[rank3] or hand[rank2] == hand[rank4] or hand[rank2] == hand[rank5] or hand[rank3] == hand[rank4] or 
-      hand[rank3] == hand[rank5] or hand[rank4] == hand[rank5]
+      hand[rank1] == hand[rank2] | hand[rank1] == hand[rank3] | hand[rank1] == hand[rank4] | hand[rank1] == hand[rank5] | 
+      hand[rank2] == hand[rank3] | hand[rank2] == hand[rank4] | hand[rank2] == hand[rank5] | hand[rank3] == hand[rank4] | 
+      hand[rank3] == hand[rank5] | hand[rank4] == hand[rank5]
 
   - rule: Two_pairs
     args: [hand]
     # BETTER_RULE: min_true(2, (r1 == r2 for r1, r2 in combinations(hand.ranks, 2)))
     clause: |
-      (hand[rank1] == hand[rank2] and (hand[rank3] == hand[rank4] or hand[rank3] == hand[rank5] or hand[rank4] == hand[rank5])) or 
-      (hand[rank1] == hand[rank3] and (hand[rank2] == hand[rank4] or hand[rank2] == hand[rank5] or hand[rank4] == hand[rank5])) or
-      (hand[rank1] == hand[rank4] and (hand[rank2] == hand[rank3] or hand[rank2] == hand[rank5] or hand[rank3] == hand[rank5])) or
-      (hand[rank1] == hand[rank5] and (hand[rank2] == hand[rank3] or hand[rank2] == hand[rank4] or hand[rank3] == hand[rank4]))
+      (hand[rank1] == hand[rank2] & (hand[rank3] == hand[rank4] | hand[rank3] == hand[rank5] | hand[rank4] == hand[rank5])) | 
+      (hand[rank1] == hand[rank3] & (hand[rank2] == hand[rank4] | hand[rank2] == hand[rank5] | hand[rank4] == hand[rank5])) | 
+      (hand[rank1] == hand[rank4] & (hand[rank2] == hand[rank3] | hand[rank2] == hand[rank5] | hand[rank3] == hand[rank5])) | 
+      (hand[rank1] == hand[rank5] & (hand[rank2] == hand[rank3] | hand[rank2] == hand[rank4] | hand[rank3] == hand[rank4]))
 
   - rule: Three_of_a_kind
     args: [hand]
     # BETTER_RULE: min_repetitions(3, hand.ranks)
     clause: |
-      (hand[rank1] == hand[rank2] and hand[rank1] == hand[rank3]) or
-      (hand[rank1] == hand[rank2] and hand[rank1] == hand[rank4]) or
-      (hand[rank1] == hand[rank2] and hand[rank1] == hand[rank5]) or
-      (hand[rank1] == hand[rank3] and hand[rank1] == hand[rank4]) or
-      (hand[rank1] == hand[rank3] and hand[rank1] == hand[rank5]) or
-      (hand[rank1] == hand[rank4] and hand[rank1] == hand[rank5]) or
-      (hand[rank2] == hand[rank3] and hand[rank2] == hand[rank4]) or
-      (hand[rank2] == hand[rank3] and hand[rank2] == hand[rank5]) or
-      (hand[rank2] == hand[rank4] and hand[rank2] == hand[rank5]) or
-      (hand[rank3] == hand[rank4] and hand[rank3] == hand[rank5])
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3]) | 
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank4]) | 
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank5]) | 
+      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4]) | 
+      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank5]) | 
+      (hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) | 
+      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank4]) | 
+      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank5]) | 
+      (hand[rank2] == hand[rank4] & hand[rank2] == hand[rank5]) | 
+      (hand[rank3] == hand[rank4] & hand[rank3] == hand[rank5])
 
   - rule: Maximum_Straight
     args: [hand]
     clause: | 
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 1) and 
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 10) and
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 11) and
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 12) and
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 13) and
+      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 1) & 
+      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 10) & 
+      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 11) & 
+      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 12) & 
+      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 13) & 
 
   - rule: Straight
     args: [hand]
-    # BETTER_RULE: min_true(1, ((r1 == r2 + 1 or r2 == r1 + 12) and r2 == r3 + 1 and r3 == r4 + 1 and r4 == r5 + 1 for r1, r2, r3, r4, r5 in permutations(hand.ranks, 5)))
+    # BETTER_RULE: min_true(1, ((r1 == r2 + 1 | r2 == r1 + 12) & r2 == r3 + 1 & r3 == r4 + 1 & r4 == r5 + 1 for r1, r2, r3, r4, r5 in permutations(hand.ranks, 5)))
     # The better rule considers also the case {10, 11, 12, 13, 1}.
     # FIXME: the rule below will not work: there are no guarantees that the ranks are sorted
     # FIXME: both rules are not adequate, because they do not consider the case {10, 11, 12, 13, 1}
 #    clause: |
-#      (hand[rank1] == hand[rank2] + 1 and hand[rank2] == hand[rank3] + 1 and hand[rank3] == hand[rank4] + 1 and hand[rank4] == hand[rank5] + 1) or
-#      (hand[rank1] == hand[rank2] - 1 and hand[rank2] == hand[rank3] - 1 and hand[rank3] == hand[rank4] - 1 and hand[rank4] == hand[rank5] - 1)
-    clause: Maximum_Straight(hand) or variance([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]]) == 2.5
+#      (hand[rank1] == hand[rank2] + 1 & hand[rank2] == hand[rank3] + 1 & hand[rank3] == hand[rank4] + 1 & hand[rank4] == hand[rank5] + 1) or
+#      (hand[rank1] == hand[rank2] - 1 & hand[rank2] == hand[rank3] - 1 & hand[rank3] == hand[rank4] - 1 & hand[rank4] == hand[rank5] - 1)
+    clause: Maximum_Straight(hand) | variance([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]]) == 2.5
 
   - rule: Flush
     args: [hand]
     # BETTER_RULE: min_repetitions(5, hand.suits)
     # all_equal(hand.suits)
-    clause: hand[suit1] == hand[suit2] and hand[suit1] == hand[suit3] and hand[suit1] == hand[suit4] and hand[suit1] == hand[suit5]
+    clause: hand[suit1] == hand[suit2] & hand[suit1] == hand[suit3] & hand[suit1] == hand[suit4] & hand[suit1] == hand[suit5]
 
   - rule: Full_house
     args: [hand]
     # FIXME: the rule will not work because if there is a three of a kind, there is also a pair overlapping with it
-    clause: Three_of_a_kind(hand) and Pair(hand)
+    clause: Three_of_a_kind(hand) & Pair(hand)
 
   - rule: Four_of_a_kind
     args: [hand]
     # BETTER_RULE: min_repetitions(4, hand.ranks)
     clause: |
-      (hand[rank1] == hand[rank2] and hand[rank1] == hand[rank3] and hand[rank1] == hand[rank4]) or
-      (hand[rank1] == hand[rank2] and hand[rank1] == hand[rank3] and hand[rank1] == hand[rank5]) or
-      (hand[rank1] == hand[rank2] and hand[rank1] == hand[rank4] and hand[rank1] == hand[rank5]) or
-      (hand[rank1] == hand[rank3] and hand[rank1] == hand[rank4] and hand[rank1] == hand[rank5]) or
-      (hand[rank2] == hand[rank3] and hand[rank2] == hand[rank4] and hand[rank2] == hand[rank5])
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4]) or
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3] & hand[rank1] == hand[rank5]) or
+      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) or
+      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) or
+      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank4] & hand[rank2] == hand[rank5])
 
   - rule: Straight_flush
     args: [hand]
-    clause: Straight(hand) and Flush(hand)
+    clause: Straight(hand) & Flush(hand)
 
   - rule: Royal_flush
     args: [hand]
-    # BETTER_RULE: Straight_flush(hand) and contains(ace, hand.ranks)
+    # BETTER_RULE: Straight_flush(hand) & contains(ace, hand.ranks)
     # FIXME: the rule below will not work: it does not consider the case the case {10, 11, 12, 13, 1} (the rule above assumes that the case is handled by Straight)
-#    clause: Straight_flush(hand) and (hand[rank1] == ace or hand[rank2] == ace or hand[rank3] == ace or hand[rank4] == ace or hand[rank5] == ace)
-    clause: Flush(hand) and Maximum_Straight(hand)
+#    clause: Straight_flush(hand) & (hand[rank1] == ace | hand[rank2] == ace | hand[rank3] == ace | hand[rank4] == ace | hand[rank5] == ace)
+    clause: Flush(hand) & Maximum_Straight(hand)
 
 constraints:
   - PokerHand(hand) == hand[class]

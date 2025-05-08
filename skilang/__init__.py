@@ -1,7 +1,7 @@
 from typing import Dict, Iterable
 
-from skilang.utils import logger
 from skilang.builtins import skilang_builtins_dict
+from skilang.utils import logger
 
 
 class EvaluationError(Exception):
@@ -291,9 +291,9 @@ class Expression(Formula, ArgsMixin):
             elif operator == ">>":
                 return first_arg >> second_arg
             elif operator == "&":
-                return first_arg & second_arg
+                return first_arg and second_arg
             elif operator == "|":
-                return first_arg | second_arg
+                return first_arg or second_arg
             elif operator == "^":
                 return first_arg ^ second_arg
             elif operator == "==":
