@@ -1,6 +1,7 @@
 from typing import Dict, Iterable
 
 from skilang.builtins import skilang_builtins_dict
+from skilang.preprocessing import preprocessing
 from skilang.utils import logger
 
 
@@ -479,7 +480,8 @@ class SymbolProvider(Dict[str, object]):
 
 def parse(string: str) -> Formula:
     with Formula._comparison_operators_as_builders():
-        return eval(string, SymbolProvider())
+        preprocessed_input: str = preprocessing(string)
+        return eval(preprocessed_input, SymbolProvider())
 
 
 # let this be the last line of this file
