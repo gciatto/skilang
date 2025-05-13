@@ -4,7 +4,7 @@ from torchic.nn.builder import NeuralNetworkBuilder
 from torchic.utils import get_current_device, logger
 
 INPUT_SIZE = 10
-NUM_CLASSES = 9
+NUM_CLASSES = 10
 
 builder = NeuralNetworkBuilder(device=get_current_device())
 model: NeuralNetwork = (

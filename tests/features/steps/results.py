@@ -25,7 +25,7 @@ def step_boolean_result(context, expected: str):
     """
     if "result" not in context:
         raise ValueError("Actual result not provided.")
-    assert bool(expected) == context.result, f"Expected {expected}, but got {context.result}"
+    assert (expected.lower() == "true") == context.result, f"Expected {expected}, but got {context.result}"
 
 
 @then('the result should be the string "{expected}"')
