@@ -14,6 +14,8 @@ python = ">= 3.10.0 < 3.13.0"
 scikit-learn = "^1.5.0"
 pandas = "^2.2.2"
 torch = "^2.6.0"
+pytorchic = "^4.0.0"
+openml = "^0.15.1"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.0"
@@ -23,6 +25,7 @@ poetry = "^2.0.0"
 pytest = "^8.2.2"
 behave = "^1.2.6"
 ruff = "^0.11.5"
+types-pyyaml = "^6.0.12.20250402"
 
 [tool.poe.tasks]
 bdd-test = "behave tests/features"
@@ -33,6 +36,7 @@ coverage-html = "coverage html"
 ruff-check = "ruff check"
 ruff-fix = "ruff check --fix"
 format = "ruff format"
+format-check = "ruff format --check"
 mypy = "mypy skilang tests"
 compile = "python -m compileall skilang tests"
 static-checks = [

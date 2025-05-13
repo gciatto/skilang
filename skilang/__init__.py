@@ -1,8 +1,10 @@
-import logging
-from typing import Dict, Iterable
+from typing import Dict, Iterable, Callable
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("skilang")
+from torch import Tensor
+
+from skilang.builtins import skilang_builtins_dict
+from skilang.preprocessing import preprocessing
+from skilang.utils import logger
 
 
 class EvaluationError(Exception):
@@ -38,6 +40,7 @@ class Formula:
 
     def evaluate(self, **kwargs):
         try:
+            kwargs.update(skilang_builtins_dict())
             return self._evaluate(**kwargs)
         except EvaluationError:
             raise
@@ -291,9 +294,15 @@ class Expression(Formula, ArgsMixin):
             elif operator == ">>":
                 return first_arg >> second_arg
             elif operator == "&":
-                return first_arg & second_arg
+                if isinstance(first_arg, Tensor) and isinstance(second_arg, Tensor):
+                    return first_arg.logical_and(second_arg)
+                else:
+                    return first_arg and second_arg
             elif operator == "|":
-                return first_arg | second_arg
+                if isinstance(first_arg, Tensor) and isinstance(second_arg, Tensor):
+                    return first_arg.logical_or(second_arg)
+                else:
+                    return first_arg or second_arg
             elif operator == "^":
                 return first_arg ^ second_arg
             elif operator == "==":
@@ -330,6 +339,7 @@ class Expression(Formula, ArgsMixin):
             method = getattr(receiver, self.args[1].functor)
             args = [arg.evaluate(**kwargs) for arg in self.args[1].args]
             return method(*args)
+
         first = self.args[0].evaluate(**kwargs)
         others = [arg.evaluate(**kwargs) for arg in self.args[1:]]
         return self.__evaluate(self.operator, self.arity, first, others, **kwargs)
@@ -381,6 +391,8 @@ class Term(Formula):
     def _evaluate(self, **kwargs):
         if self.symbol is not None and self.symbol in kwargs:
             return kwargs[self.symbol]
+        if isinstance(self.value, Iterable) and not isinstance(self.value, str):
+            return [arg.evaluate(**kwargs) if isinstance(arg, Formula) else arg for arg in self.value]
         return self.value
 
     def __call__(self, *args):
@@ -425,6 +437,9 @@ class Symbol(Formula):
         return Predicate(self.name, *[self._force_formula(arg) for arg in args])
 
 
+evaluated_predicates: Dict[str, Callable] = {}
+
+
 class Predicate(Formula, ArgsMixin):
     def __init__(self, functor: str, *args: Formula):
         self.functor = functor
@@ -463,8 +478,15 @@ class Predicate(Formula, ArgsMixin):
         function = kwargs.get(self.functor)
         if function is None or not callable(function):
             raise EvaluationError(self, f"No viable grounding for functor: {self.functor}", kwargs)
-        args = [arg.evaluate(**kwargs) for arg in self.args]
-        return function(*args)
+        kwargs_without_functor = kwargs.copy()
+        kwargs_without_functor.pop(self.functor)
+        args = [arg.evaluate(**kwargs_without_functor) for arg in self.args]
+
+        if self.functor in evaluated_predicates.keys():
+            return evaluated_predicates[self.functor](*args)
+        else:
+            evaluated_predicates[self.functor] = function
+            return function(*args)
 
 
 class SymbolProvider(Dict[str, object]):
@@ -476,8 +498,10 @@ class SymbolProvider(Dict[str, object]):
 
 
 def parse(string: str) -> Formula:
+    evaluated_predicates.clear()
     with Formula._comparison_operators_as_builders():
-        return eval(string, SymbolProvider())
+        preprocessed_input: str = preprocessing(string)
+        return eval(preprocessed_input, SymbolProvider())
 
 
 # let this be the last line of this file

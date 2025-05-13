@@ -17,6 +17,17 @@ def step_number_result(context, expected: str):
     assert float(expected) == context.result, f"Expected {float(expected)}, but got {context.result}"
 
 
+@then('the result should be the boolean "{expected}"')
+def step_boolean_result(context, expected: str):
+    """
+    :type context: behave.runner.Context
+    :param expected: the expected result
+    """
+    if "result" not in context:
+        raise ValueError("Actual result not provided.")
+    assert (expected.lower() == "true") == context.result, f"Expected {expected}, but got {context.result}"
+
+
 @then('the result should be the string "{expected}"')
 def step_string_result(context, expected: str):
     """
