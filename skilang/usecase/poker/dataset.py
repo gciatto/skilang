@@ -41,13 +41,13 @@ dataset[last_col] = dataset[last_col].astype(int) - 1  # Convert to zero-based i
 
 # Data preprocessing
 X = dataset.iloc[:, :-1].values
-Y = dataset.iloc[:, -1].values
+y = dataset.iloc[:, -1].values
 
 
 logger.info(f"X shape: {X.shape}")
 logger.info(f"X: {X}")
-logger.info(f"y shape: {Y.shape}")
-logger.info(f"y: {Y}")
+logger.info(f"y shape: {y.shape}")
+logger.info(f"y: {y}")
 
 
 # One-hot encoding of class variable
@@ -57,7 +57,7 @@ logger.info(f"y: {Y}")
 # logger.info(f"encoded y shape: {y.shape}")
 # logger.info(f"encoded y: {y}")
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
 # training = pd.read_csv(dataset_path("poker-hand/poker-hand-testing.csv"))
@@ -76,15 +76,15 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 # Conversione in tensori PyTorch
 X_train = torch.tensor(X_train, dtype=torch.float32)
 X_test = torch.tensor(X_test, dtype=torch.float32)
-Y_train = torch.tensor(Y_train, dtype=torch.float32)
-Y_test = torch.tensor(Y_test, dtype=torch.float32)
+y_train = torch.tensor(y_train, dtype=torch.float32)
+y_test = torch.tensor(y_test, dtype=torch.float32)
 logger.info(f"X_train shape: {X_train.shape}")
 logger.info(f"X_train: {X_train}")
-logger.info(f"y_train shape: {Y_train.shape}")
-logger.info(f"y_train: {Y_train}")
+logger.info(f"y_train shape: {y_train.shape}")
+logger.info(f"y_train: {y_train}")
 
 # Creazione del DataLoader
-train_dataset = TensorDataset(X_train, Y_train)
-test_dataset = TensorDataset(X_test, Y_test)
+train_dataset = TensorDataset(X_train, y_train)
+test_dataset = TensorDataset(X_test, y_test)
 train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=512, shuffle=False)
