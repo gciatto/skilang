@@ -25,6 +25,7 @@ poetry = "^1.8.3"
 pytest = "^8.2.2"
 behave = "^1.2.6"
 ruff = "^0.11.5"
+types-pyyaml = "^6.0.12.20250402"
 
 [tool.poe.tasks]
 bdd-test = "behave tests/features"

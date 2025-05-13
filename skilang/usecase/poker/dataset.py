@@ -25,7 +25,19 @@ dataset.columns = columns
 last_col = dataset.columns[-1]
 dataset[last_col] = dataset[last_col].astype(int) - 1  # Convert to zero-based index
 
-print(dataset.describe())
+# print(dataset.describe())
+
+# numerous_classes = dataset[last_col].sort_values().unique()[:2]
+#
+# print(numerous_classes)
+# print(dataset[last_col].value_counts())
+# filtered_dataset = dataset[dataset[last_col].isin(numerous_classes)]
+#
+# fraction = 0.1
+# sampled = filtered_dataset.groupby(last_col, group_keys=False).apply(lambda df: df.sample(frac=fraction, random_state=42))
+# remaining = dataset[~dataset[last_col].isin(numerous_classes)]
+# dataset = pd.concat([sampled, remaining], ignore_index=True)
+# print(dataset[last_col].value_counts())
 
 # Data preprocessing
 X = dataset.iloc[:, :-1].values
@@ -74,5 +86,5 @@ logger.info(f"y_train: {Y_train}")
 # Creazione del DataLoader
 train_dataset = TensorDataset(X_train, Y_train)
 test_dataset = TensorDataset(X_test, Y_test)
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=512, shuffle=False)

@@ -78,42 +78,42 @@ knowledge:
     args: [hand]
     # BETTER_RULE: min_repetitions(2, hand.ranks)
     clause: |
-      hand[rank1] == hand[rank2] | hand[rank1] == hand[rank3] | hand[rank1] == hand[rank4] | hand[rank1] == hand[rank5] | 
-      hand[rank2] == hand[rank3] | hand[rank2] == hand[rank4] | hand[rank2] == hand[rank5] | hand[rank3] == hand[rank4] | 
-      hand[rank3] == hand[rank5] | hand[rank4] == hand[rank5]
+      (hand[rank1] == hand[rank2]) | (hand[rank1] == hand[rank3]) | (hand[rank1] == hand[rank4]) | (hand[rank1] == hand[rank5]) | 
+      (hand[rank2] == hand[rank3]) | (hand[rank2] == hand[rank4]) | (hand[rank2] == hand[rank5]) | (hand[rank3] == hand[rank4]) | 
+      (hand[rank3] == hand[rank5]) | (hand[rank4] == hand[rank5])
 
   - rule: Two_pairs
     args: [hand]
     # BETTER_RULE: min_true(2, (r1 == r2 for r1, r2 in combinations(hand.ranks, 2)))
     clause: |
-      (hand[rank1] == hand[rank2] & (hand[rank3] == hand[rank4] | hand[rank3] == hand[rank5] | hand[rank4] == hand[rank5])) | 
-      (hand[rank1] == hand[rank3] & (hand[rank2] == hand[rank4] | hand[rank2] == hand[rank5] | hand[rank4] == hand[rank5])) | 
-      (hand[rank1] == hand[rank4] & (hand[rank2] == hand[rank3] | hand[rank2] == hand[rank5] | hand[rank3] == hand[rank5])) | 
-      (hand[rank1] == hand[rank5] & (hand[rank2] == hand[rank3] | hand[rank2] == hand[rank4] | hand[rank3] == hand[rank4]))
+      ((hand[rank1] == hand[rank2]) & ((hand[rank3] == hand[rank4]) | (hand[rank3] == hand[rank5]) | (hand[rank4] == hand[rank5]))) | 
+      ((hand[rank1] == hand[rank3]) & ((hand[rank2] == hand[rank4]) | (hand[rank2] == hand[rank5]) | (hand[rank4] == hand[rank5]))) | 
+      ((hand[rank1] == hand[rank4]) & ((hand[rank2] == hand[rank3]) | (hand[rank2] == hand[rank5]) | (hand[rank3] == hand[rank5]))) | 
+      ((hand[rank1] == hand[rank5]) & ((hand[rank2] == hand[rank3]) | (hand[rank2] == hand[rank4]) | (hand[rank3] == hand[rank4])))
 
   - rule: Three_of_a_kind
     args: [hand]
     # BETTER_RULE: min_repetitions(3, hand.ranks)
     clause: |
-      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3]) | 
-      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank4]) | 
-      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank5]) | 
-      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4]) | 
-      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank5]) | 
-      (hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) | 
-      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank4]) | 
-      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank5]) | 
-      (hand[rank2] == hand[rank4] & hand[rank2] == hand[rank5]) | 
-      (hand[rank3] == hand[rank4] & hand[rank3] == hand[rank5])
+      ((hand[rank1] == hand[rank2]) & (hand[rank1] == hand[rank3])) | 
+      ((hand[rank1] == hand[rank2]) & (hand[rank1] == hand[rank4])) | 
+      ((hand[rank1] == hand[rank2]) & (hand[rank1] == hand[rank5])) | 
+      ((hand[rank1] == hand[rank3]) & (hand[rank1] == hand[rank4])) | 
+      ((hand[rank1] == hand[rank3]) & (hand[rank1] == hand[rank5])) | 
+      ((hand[rank1] == hand[rank4]) & (hand[rank1] == hand[rank5])) | 
+      ((hand[rank2] == hand[rank3]) & (hand[rank2] == hand[rank4])) | 
+      ((hand[rank2] == hand[rank3]) & (hand[rank2] == hand[rank5])) | 
+      ((hand[rank2] == hand[rank4]) & (hand[rank2] == hand[rank5])) | 
+      ((hand[rank3] == hand[rank4]) & (hand[rank3] == hand[rank5]))
 
   - rule: Maximum_Straight
     args: [hand]
     clause: | 
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 1) & 
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 10) & 
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 11) & 
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 12) & 
-      contains([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]], 13) & 
+      contains(concat(hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]), 1) & 
+      contains(concat(hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]), 10) & 
+      contains(concat(hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]), 11) & 
+      contains(concat(hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]), 12) & 
+      contains(concat(hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]), 13)
 
   - rule: Straight
     args: [hand]
@@ -124,13 +124,13 @@ knowledge:
 #    clause: |
 #      (hand[rank1] == hand[rank2] + 1 & hand[rank2] == hand[rank3] + 1 & hand[rank3] == hand[rank4] + 1 & hand[rank4] == hand[rank5] + 1) or
 #      (hand[rank1] == hand[rank2] - 1 & hand[rank2] == hand[rank3] - 1 & hand[rank3] == hand[rank4] - 1 & hand[rank4] == hand[rank5] - 1)
-    clause: Maximum_Straight(hand) | variance([hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5]]) == 2.5
+    clause: Maximum_Straight(hand) | (variance(concat(hand[rank1], hand[rank2], hand[rank3], hand[rank4], hand[rank5])) == 2.5)
 
   - rule: Flush
     args: [hand]
     # BETTER_RULE: min_repetitions(5, hand.suits)
     # all_equal(hand.suits)
-    clause: hand[suit1] == hand[suit2] & hand[suit1] == hand[suit3] & hand[suit1] == hand[suit4] & hand[suit1] == hand[suit5]
+    clause: (hand[suit1] == hand[suit2]) & (hand[suit1] == hand[suit3]) & (hand[suit1] == hand[suit4]) & (hand[suit1] == hand[suit5])
 
   - rule: Full_house
     args: [hand]
@@ -141,11 +141,11 @@ knowledge:
     args: [hand]
     # BETTER_RULE: min_repetitions(4, hand.ranks)
     clause: |
-      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4]) or
-      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank3] & hand[rank1] == hand[rank5]) or
-      (hand[rank1] == hand[rank2] & hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) or
-      (hand[rank1] == hand[rank3] & hand[rank1] == hand[rank4] & hand[rank1] == hand[rank5]) or
-      (hand[rank2] == hand[rank3] & hand[rank2] == hand[rank4] & hand[rank2] == hand[rank5])
+      ((hand[rank1] == hand[rank2]) & (hand[rank1] == hand[rank3]) & (hand[rank1] == hand[rank4])) | 
+      ((hand[rank1] == hand[rank2]) & (hand[rank1] == hand[rank3]) & (hand[rank1] == hand[rank5])) | 
+      ((hand[rank1] == hand[rank2]) & (hand[rank1] == hand[rank4]) & (hand[rank1] == hand[rank5])) | 
+      ((hand[rank1] == hand[rank3]) & (hand[rank1] == hand[rank4]) & (hand[rank1] == hand[rank5])) | 
+      ((hand[rank2] == hand[rank3]) & (hand[rank2] == hand[rank4]) & (hand[rank2] == hand[rank5]))
 
   - rule: Straight_flush
     args: [hand]
