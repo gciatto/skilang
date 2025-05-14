@@ -1,29 +1,24 @@
+from dataclasses import dataclass
 from itertools import islice
 from typing import List, Dict, Callable
 
 from skilang import Formula, parse
 
 
+@dataclass
 class Rule:
-    def __init__(self, name: str, clause: str):
-        self.name: str = name
-        self.clause: str = clause
-
-    def __str__(self) -> str:
-        return f"Rule(name={self.name}, clause={self.clause})"
-
-    def __repr__(self) -> str:
-        return f"Rule(name={self.name}, clause={self.clause})"
-
-
-def get_rules(specification: dict) -> List[Rule]:
-    knowledge = specification["knowledge"]
-    rules = [Rule(name=rule["rule"], clause=__preprocess_string(rule["clause"])) for rule in knowledge]
-    return rules
+    name: str
+    clause: Formula
 
 
 def __preprocess_string(string: str) -> str:
     return string.replace("[", "[:, ").replace("\n", " ")
+
+
+def get_rules(specification: dict) -> List[Rule]:
+    knowledge = specification["knowledge"]
+    rules = [Rule(name=rule["rule"], clause=parse(__preprocess_string(rule["clause"]))) for rule in knowledge]
+    return rules
 
 
 def get_knowledge(specification: dict, base_assignments: Dict) -> Dict[str, Callable]:
@@ -40,8 +35,7 @@ def get_knowledge(specification: dict, base_assignments: Dict) -> Dict[str, Call
 
     rules: List[Rule] = get_rules(specification)
     for index, rule in enumerate(rules):
-        parsed_rule: Formula = parse(rule.clause)
-        rule_definition: Callable = create_rule_definition(parsed_rule, index)
+        rule_definition: Callable = create_rule_definition(rule.clause, index)
         knowledge[rule.name] = rule_definition
 
     return knowledge

@@ -7,7 +7,7 @@ from torch import nn, optim, Tensor
 from torchic.nn import NeuralNetwork
 from torchic.nn.trainers import AbstractTrainer
 
-from skilang import Formula, parse
+from skilang import Formula
 from skilang.knowledge import get_knowledge, get_rules, Rule
 from skilang.usecase.poker.dataset import train_loader, test_loader
 from skilang.usecase.poker.model import model
@@ -37,7 +37,7 @@ def regularization(input_batch: Tensor, target: Tensor) -> Tensor:
 
     assignments = base_assignments.copy()
     for index, rule in enumerate(rules[:9]):
-        formula: Formula = parse(rule.clause)
+        formula: Formula = rule.clause
         rule_target = index + 1
         knowledge_so_far: Dict = dict(islice(knowledge.items(), index + 1))
         assignments.update(knowledge_so_far)
