@@ -15,13 +15,13 @@ def __preprocess_string(string: str) -> str:
     return string.replace("[", "[:, ").replace("\n", " ")
 
 
-def get_rules(specification: dict) -> List[Rule]:
+def get_knowledge(specification: dict) -> List[Rule]:
     knowledge = specification["knowledge"]
     rules = [Rule(name=rule["rule"], clause=parse(__preprocess_string(rule["clause"]))) for rule in knowledge]
     return rules
 
 
-def get_knowledge(specification: dict, base_assignments: Dict) -> Dict[str, Callable]:
+def get_rules_assignments(specification: dict, base_assignments: Dict) -> Dict[str, Callable]:
     knowledge: Dict[str, Callable] = {}
 
     def create_rule_definition(parsed_rule: Formula, index: int) -> Callable:
@@ -33,7 +33,7 @@ def get_knowledge(specification: dict, base_assignments: Dict) -> Dict[str, Call
 
         return rule_definition
 
-    rules: List[Rule] = get_rules(specification)
+    rules: List[Rule] = get_knowledge(specification)
     for index, rule in enumerate(rules):
         rule_definition: Callable = create_rule_definition(rule.clause, index)
         knowledge[rule.name] = rule_definition

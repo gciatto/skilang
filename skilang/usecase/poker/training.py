@@ -2,18 +2,18 @@ from itertools import islice
 from typing import Tuple, Callable, Dict, Any, List
 
 import torch
-import yaml
 from torch import nn, optim, Tensor
 from torchic.nn import NeuralNetwork
 from torchic.nn.trainers import AbstractTrainer
 
 from skilang import Formula
-from skilang.knowledge import get_knowledge, get_rules, Rule
+from skilang.__main__ import parse_specification
+from skilang.knowledge import get_rules_assignments, get_knowledge, Rule
 from skilang.usecase.poker.dataset import train_loader, test_loader
 from skilang.usecase.poker.model import model
 from tests.resources import resource_path
 
-specification = yaml.load(open(resource_path("poker-hand.yml")), Loader=yaml.FullLoader)
+specification: Dict = parse_specification(resource_path("poker-hand.yml"))
 
 
 def regularization(input_batch: Tensor, target: Tensor) -> Tensor:
@@ -30,8 +30,8 @@ def regularization(input_batch: Tensor, target: Tensor) -> Tensor:
         "rank5": 9,
         "hand": input_batch,
     }
-    knowledge: Dict[str, Callable] = get_knowledge(specification, base_assignments)
-    rules: List[Rule] = get_rules(specification)
+    knowledge: Dict[str, Callable] = get_rules_assignments(specification, base_assignments)
+    rules: List[Rule] = get_knowledge(specification)
 
     regularization_tensor: Tensor = torch.ones(input_batch.shape[0]).to(input_batch.device)
 
@@ -83,12 +83,11 @@ class SkiTrainer(AbstractTrainer):
 
 
 trainer = SkiTrainer(model)
-
 loss = nn.CrossEntropyLoss(reduction="none")
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
-trainer.fit(train_loader, test_loader, loss, optimizer, epochs=5)
+trainer.fit(train_loader, test_loader, loss, optimizer, epochs=2)
 
 model.plot_loss()
 model.save("model.pth")
