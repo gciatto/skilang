@@ -33,3 +33,7 @@ def set_other_loggers_level(level: int | str = logging.ERROR):
 
 
 set_other_loggers_level(logging.WARNING)
+
+
+def preprocess_batch_tensors(string: str) -> str:
+    return string.replace("[", "[:, ").replace("\n", " ")

@@ -11,13 +11,9 @@ class Rule:
     clause: Formula
 
 
-def __preprocess_string(string: str) -> str:
-    return string.replace("[", "[:, ").replace("\n", " ")
-
-
 def get_knowledge(specification: dict) -> List[Rule]:
     knowledge = specification["knowledge"]
-    rules = [Rule(name=rule["rule"], clause=parse(__preprocess_string(rule["clause"]))) for rule in knowledge]
+    rules = [Rule(name=rule["rule"], clause=parse(rule["clause"])) for rule in knowledge]
     return rules
 
 

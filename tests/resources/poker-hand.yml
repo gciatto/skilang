@@ -1,77 +1,112 @@
 data:
-  poker-hand:
+  PokerHand:
     training: &dataset
-      file: https://archive.ics.uci.edu/static/public/158/poker+hand.zip
-      unpack: poker-hand-training-true.data
-      type: csv(',')
-      percent: 80%
-    test: 
-      <<: *dataset
-      unpack: poker-hand-testing.data
+#      file: https://archive.ics.uci.edu/static/public/158/poker+hand.zip
+      file: datasets/poker-hand/poker-hand-training.csv
+#      unpack: datasets/poker-hand/poker-hand-training-true.data
+#      type: csv(',')
+#      percent: 80%
+    test:
+      file: datasets/poker-hand/poker-hand-testing.csv
+#      unpack: datasets/poker-hand/poker-hand-testing.data
     features:
-      - in: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
-        values: &suits [hearts, spades, diamonds, clubs]  # FIXME: maybe to convert into 1,2,3,4 (?)
-      - in: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
-        values: &ranks [ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king] # FIXME: maybe to convert into 1,2,...,11,12,13 (?)
-      - in: suit2 # ordinal (1-4) representing 
+      - name: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
+        values: &suits [hearts, spades, diamonds, clubs]
+        mapping: &suits_mapping
+          hearts: 1
+          spades: 2
+          diamonds: 3
+          clubs: 4
+      - name: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
+        values: &ranks [ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king]
+        mapping: &ranks_mapping
+          ace: 1
+          jack: 11
+          queen: 12
+          king: 13
+      - name: suit2 # ordinal (1-4) representing
         values: *suits
-      - in: rank2 # numerical (1-13) representing 
+        mapping: *suits_mapping
+      - name: rank2 # numerical (1-13) representing
         values: *ranks
-      - in: suit3 # ordinal (1-4) representing 
+        mapping: *ranks_mapping
+      - name: suit3 # ordinal (1-4) representing
         values: *suits
-      - in: rank3 # numerical (1-13) representing 
+        mapping: *suits_mapping
+      - name: rank3 # numerical (1-13) representing
         values: *ranks
-      - in: suit4 # ordinal (1-4) representing 
+        mapping: *ranks_mapping
+      - name: suit4 # ordinal (1-4) representing
         values: *suits
-      - in: rank4 # numerical (1-13) representing 
+        mapping: *suits_mapping
+      - name: rank4 # numerical (1-13) representing
         values: *ranks
-      - in: suit5 # ordinal (1-4) representing 
+        mapping: *ranks_mapping
+      - name: suit5 # ordinal (1-4) representing
         values: *suits
-      - in: rank5 # numerical (1-13) representing 
+        mapping: *suits_mapping
+      - name: rank5 # numerical (1-13) representing
         values: *ranks
-      - out: class
-        values:
-          - nothing            # Nothing in hand; not a recognized poker hand
-          - one_pair           # One pair; one pair of equal ranks within five cards
-          - two_pairs          # Two pairs; two pairs of equal ranks within five cards
-          - three_of_a_kind    # Three of a kind; three equal ranks within five cards
-          - straight           # Straight; five cards, sequentially ranked with no gaps
-          - flush              # Flush; five cards with the same suit
-          - full_house         # Full house; pair + different rank three of a kind
-          - four_of_a_kind     # Four of a kind; four equal ranks within five cards
-          - straight_flush     # Straight flush; straight + flush
-          - royal_flush        # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
-      - group: suits
-        features: [suit1, suit2, suit3, suit4, suit5]
-      - group: ranks
-        features: [rank1, rank2, rank3, rank4, rank5]
+        mapping: *ranks_mapping
+#      - group: suits
+#        features: [suit1, suit2, suit3, suit4, suit5]
+#      - group: ranks
+#        features: [rank1, rank2, rank3, rank4, rank5]
+    target:
+      name: Class
+      values:
+        - nothing            # Nothing in hand; not a recognized poker hand
+        - one_pair           # One pair; one pair of equal ranks within five cards
+        - two_pairs          # Two pairs; two pairs of equal ranks within five cards
+        - three_of_a_kind    # Three of a kind; three equal ranks within five cards
+        - straight           # Straight; five cards, sequentially ranked with no gaps
+        - flush              # Flush; five cards with the same suit
+        - full_house         # Full house; pair + different rank three of a kind
+        - four_of_a_kind     # Four of a kind; four equal ranks within five cards
+        - straight_flush     # Straight flush; straight + flush
+        - royal_flush        # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
+      mapping:
+        nothing: 0
+        one_pair: 1
+        two_pairs: 2
+        three_of_a_kind: 3
+        straight: 4
+        flush: 5
+        full_house: 6
+        four_of_a_kind: 7
+        straight_flush: 8
+        royal_flush: 9
 
 instances:
   - hand: poker-hand
 
 optimization:
-  epochs: 100
-  # learning_rate: 0.001
-  loss: categorical_crossentropy
+  epochs: 2
+  learning_rate: 0.001
+  loss: cross_entropy
   metrics: [accuracy]
-  batch_size: 128
+  batch_size: 512
 
 learnable:
   PokerHand:
+    dataset: PokerHand
     inputs:
-      - features.__inputs__
+      - PokerHand.features
     outputs:
-      - source: features.class
+      - source: features.Class
         transform: one_hot_encoding
-    structure:
-      feed-forward:
-        layers:
-          - in: 256
-            activation: leaky_relu
-            regularization: l2
-            dropout: 0.2
-          - out: 10
-            activation: softmax 
+    type: feed_forward
+    layers:
+      - linear:
+          input: 256
+          output: 128
+          activation: leaky_relu
+  #        regularization: l2
+          dropout: 0.2
+      - linear:
+          input: 128
+          output: 10
+          activation: softmax
 
 knowledge:
   - rule: Pair
@@ -159,32 +194,42 @@ knowledge:
     clause: Flush(hand) & Maximum_Straight(hand)
 
 constraints:
-  - PokerHand(hand) == hand[class]
+  - always: PokerHand(hand) == hand[Class]
+    weight: 0.1
   
-  - iif: Royal_flush(hand)
+  - if: Royal_flush(hand)
     then: PokerHand(hand) == royal_flush
+    weight: 0.9
 
   # double implication is not adequate, because if Royal_flush(hand) is True, then Straight_flush(hand) is also True, yet PokerHand(hand) must output royal_flush
   - if: Straight_flush(hand)
     then: PokerHand(hand) == straight_flush
+    weight: 0.9
 
-  - iif: Four_of_a_kind(hand)
+  - if: Four_of_a_kind(hand)
     then: PokerHand(hand) == four_of_a_kind
+    weight: 0.9
 
-  - iif: Full_house(hand)
+  - if: Full_house(hand)
     then: PokerHand(hand) == full_house
+    weight: 0.9
 
-  - iif: Flush(hand)
+  - if: Flush(hand)
     then: PokerHand(hand) == flush
+    weight: 0.8
 
   - if: Straight(hand)
     then: PokerHand(hand) == straight
+    weight: 0.7
 
   - if: Three_of_a_kind(hand)
     then: PokerHand(hand) == three_of_a_kind
+    weight: 0.5
 
-  - iif: Two_pairs(hand)
+  - if: Two_pairs(hand)
     then: PokerHand(hand) == two_pairs
+    weight: 0.1
 
-  - iif: Pair(hand)
+  - if: Pair(hand)
     then: PokerHand(hand) == one_pair
+    weight: 0.1
