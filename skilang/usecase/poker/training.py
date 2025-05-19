@@ -8,7 +8,7 @@ from torchic.nn.trainers import AbstractTrainer
 
 from skilang import Formula
 from skilang.__main__ import parse_specification
-from skilang.knowledge import get_rules_assignments, get_knowledge, Rule
+from skilang.specification.knowledge import get_rules_assignments, get_knowledge, Rule
 from skilang.usecase.poker.dataset import train_loader, test_loader
 from skilang.usecase.poker.model import model
 from tests.resources import resource_path
@@ -33,7 +33,7 @@ def regularization(input_batch: Tensor, target: Tensor) -> Tensor:
     knowledge: Dict[str, Callable] = get_rules_assignments(specification, base_assignments)
     rules: List[Rule] = get_knowledge(specification)
 
-    regularization_tensor: Tensor = torch.ones(input_batch.shape[0]).to(input_batch.device)
+    regularization_tensor: Tensor = torch.zeros(input_batch.shape[0]).to(input_batch.device)
 
     assignments = base_assignments.copy()
     for index, rule in enumerate(rules[:9]):
@@ -47,7 +47,7 @@ def regularization(input_batch: Tensor, target: Tensor) -> Tensor:
         apply_penalty: Tensor = (target == rule_target) & unrespected_rule
         # apply_advantage: Tensor = (target == rule_target) & respected_rule
 
-        regularization_tensor[apply_penalty] = 1.5
+        regularization_tensor[apply_penalty] = weight
         # regularization_tensor[apply_advantage] = 0.5
     return regularization_tensor
 
@@ -63,7 +63,7 @@ class SkiTrainer(AbstractTrainer):
         pred: Tensor = self.model(input_batch)
         loss: Tensor = loss_fn(pred, target)
         regularization_tensor = regularization(input_batch, target)
-        modified_loss = loss * regularization_tensor
+        modified_loss = loss + regularization_tensor
         # Backpropagation
         # if loss is not reduced to a scalar
         if modified_loss.dim() != 0:
@@ -87,7 +87,7 @@ loss = nn.CrossEntropyLoss(reduction="none")
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
-trainer.fit(train_loader, test_loader, loss, optimizer, epochs=2)
+trainer.fit(train_loader, test_loader, loss, optimizer, epochs=10)
 
 model.plot_loss()
 model.save("model.pth")

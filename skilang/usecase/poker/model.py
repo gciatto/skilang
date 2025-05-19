@@ -8,9 +8,13 @@ NUM_CLASSES = 10
 
 builder = NeuralNetworkBuilder(device=get_current_device())
 model: NeuralNetwork = (
-    builder.add_linear(INPUT_SIZE, 64)
+    builder.add_linear(INPUT_SIZE, 128)
     .add_layer(nn.ReLU())
-    .add_linear(64, NUM_CLASSES)
+    .add_linear(128, 128)
+    .add_layer(nn.ReLU())
+    .add_linear(128, 128)
+    .add_layer(nn.ReLU())
+    .add_linear(128, NUM_CLASSES)
     .add_layer(nn.Softmax(dim=1))
     .build()
 )
