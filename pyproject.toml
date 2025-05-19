@@ -3,7 +3,7 @@ name = "skilang"
 packages = [
     { include = "skilang" },
 ]
-version = "2.1.7"
+version = "0.1.0"
 description = "A general purpose language for Symbolic Knowledge Injection"
 authors = ["Giovanni Ciatto <giovanni.ciatto@unibo.it>"]
 license = "Apache 2.0"
