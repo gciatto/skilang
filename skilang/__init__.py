@@ -482,11 +482,11 @@ class Predicate(Formula, ArgsMixin):
         kwargs_without_functor.pop(self.functor)
         args = [arg.evaluate(**kwargs_without_functor) for arg in self.args]
 
-        if self.functor in evaluated_predicates.keys():
-            return evaluated_predicates[self.functor](*args)
-        else:
-            evaluated_predicates[self.functor] = function
-            return function(*args)
+        # if self.functor in evaluated_predicates.keys():
+        #     return evaluated_predicates[self.functor](*args)
+        # else:
+        #     evaluated_predicates[self.functor] = function
+        return function(*args)
 
 
 class SymbolProvider(Dict[str, object]):
