@@ -1,4 +1,3 @@
-from itertools import islice
 from typing import List, Dict, Callable, Any
 
 import torch
@@ -6,7 +5,6 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from torchic.nn import NeuralNetwork
 
-from skilang import Formula
 from skilang.specification.constraints import Constraint, ConstraintType
 from skilang.specification.data import Dataset
 from skilang.specification.knowledge import Rule, get_rules_assignments

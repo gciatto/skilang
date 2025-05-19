@@ -20,11 +20,11 @@ class SkiTrainer(AbstractTrainer):
         pred: Tensor = self.model(input_batch)
         loss: Tensor = loss_fn(pred, target)
         regularization_tensor: Tensor = self.regularization_fn(input_batch, pred, target)
-        modified_loss = loss #+ regularization_tensor
+        modified_loss = loss + regularization_tensor
         # Backpropagation
         # if loss is not reduced to a scalar
         if modified_loss.dim() != 0:
-            modified_loss = modified_loss.mean()
+            modified_loss = modified_loss.sum()
 
         modified_loss.backward()
         return pred, modified_loss.item()
@@ -35,5 +35,5 @@ class SkiTrainer(AbstractTrainer):
         pred: Tensor = self.model(input_batch)
         loss: Tensor = loss_fn(pred, target)
         if loss.dim() != 0:
-            loss = loss.mean()
+            loss = loss.sum()
         return pred, loss.item()

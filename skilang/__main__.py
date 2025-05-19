@@ -38,7 +38,7 @@ def main():
     for model in trained_models:
         # print(f"Trained model: {model}")
         # print(f"Model parameters: {model.parameters()}")
-        model.save(f"PokerHand.pth")
+        model.save("PokerHand.pth")
 
 
 if __name__ == "__main__":
