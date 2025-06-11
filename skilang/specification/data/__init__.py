@@ -52,7 +52,12 @@ def get_datasets(specification: Dict) -> List[Dataset]:
     datasets: List[Dataset] = []
     for dataset_name, current_dataset in datasets_spec.items():
         features: List[Feature] = [
-            Feature(name=feature["name"], column=feature["column"], values=feature["values"], mapping=feature["mapping"])
+            Feature(
+                name=feature["name"],
+                column=feature["column"],
+                values=feature["values"],
+                mapping=feature["mapping"],
+            )
             for feature in current_dataset["features"]
         ]
         target: Target = Target(
@@ -72,7 +77,14 @@ def get_datasets(specification: Dict) -> List[Dataset]:
         test.columns = columns
 
         datasets.append(
-            Dataset(name=dataset_name, instance_name=current_dataset["instance_name"], features=features, target=target, training=training, test=test)
+            Dataset(
+                name=dataset_name,
+                instance_name=current_dataset["instance_name"],
+                features=features,
+                target=target,
+                training=training,
+                test=test,
+            )
         )
 
     return datasets

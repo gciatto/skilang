@@ -60,19 +60,21 @@ def train_torch_model(
     for target_value in dataset.target.values:
         dataset_assignments[target_value] = dataset.target.get_mapped_value(target_value)
 
-
     target_name: str = dataset.target.name
     instance_name: str = dataset.instance_name
 
     ski_trainer = SkiTrainer(
-        model, create_regularization_fn(model_name, instance_name, target_name,knowledge, constraints, dataset_assignments)
+        model,
+        create_regularization_fn(
+            model_name, instance_name, target_name, knowledge, constraints, dataset_assignments
+        ),
     )
     loss = get_torch_loss(optimization.loss)
     optimizer = get_torch_optimizer(optimization.optimizer, model.parameters(), optimization.learning_rate)
     epochs = optimization.epochs
     ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
     model.plot_loss()
-    model.save("model.pth")
+    model.save(f"{model_name}.pth")
     return model
 
 
@@ -92,62 +94,45 @@ def create_regularization_fn(
 
         regularization_tensor: Tensor = torch.zeros(input_batch.shape[0]).to(input_batch.device)
 
-        # print("ACTUAL ", pred.size(), "ID", id(pred))
-
         def create_model_output_fn(pred_snapshot):
-            def model_output_fn(batch_snapshot):
-                # print(batch_snapshot.size())
-                # print("SNAP", pred_snapshot.size(), "ID", id(pred_snapshot))
-                return pred_snapshot.argmax(dim=1)
+            return lambda batch_snapshot: pred_snapshot.argmax(dim=1)
 
-            return model_output_fn
         # Add the model output to the assignments
         batch_assignments.update({model_name: create_model_output_fn(pred)})
-
-        # assignments = base_assignments.copy()
-        # assignments.update(batch_assignments)
-        # assignments.update(rules_assignments)
-
-        rules_assignments: Dict[str, Callable] = get_rules_assignments(knowledge, dataset_assignments | batch_assignments)
+        rules_assignments: Dict[str, Callable] = get_rules_assignments(
+            knowledge, dataset_assignments | batch_assignments
+        )
         assignments: Dict[str, Callable] = dataset_assignments | batch_assignments | rules_assignments
-        # print(input_batch.size())
 
         for index, constraint in enumerate(constraints):
-            # knowledge_so_far: Dict = dict(islice(rules_assignments.items(), index + 1))
-            # assignments.update(knowledge_so_far)
-
             respected_constraint = constraint.clause.evaluate(**assignments)
-
             respected_condition: Tensor = torch.tensor([])
 
             if constraint.type == ConstraintType.NEVER:
                 respected_constraint = torch.logical_not(respected_constraint)
 
+            unrespected_constraint: Tensor = torch.logical_not(respected_constraint)
+
             if constraint.condition is not None:
                 respected_condition = constraint.condition.evaluate(**assignments)
 
-            unrespected_constraint: Tensor = torch.logical_not(respected_constraint)
-
             if respected_condition.nelement() > 0:
                 if constraint.type == ConstraintType.IMPLICATION:
+                    # A -> B that is NOT(A) OR B
+                    # we want the penalty so: NOT(NOT(A) OR B) that is A AND NOT(B)
                     apply_penalty: Tensor = torch.logical_and(respected_condition, unrespected_constraint)
-                # elif constraint.type == ConstraintType.DOUBLE_IMPLICATION:
-                #     apply_penalty: Tensor = torch.logical_xor(respected_condition, unrespected_constraint)
+
+                elif constraint.type == ConstraintType.DOUBLE_IMPLICATION:
+                    # A <-> B that is NOT(A XOR B)
+                    # we want the penalty so: NOT(NOT(A XOR B)) that is A XOR B
+                    apply_penalty: Tensor = torch.logical_xor(respected_condition, respected_constraint)
                 else:
                     raise ValueError(f"Unsupported constraint type: {constraint.type}")
             else:
                 apply_penalty: Tensor = unrespected_constraint
 
-            multiplier: float = 10
+            multiplier: float = 1
             regularization_tensor[apply_penalty] += multiplier * constraint.weight
-
-            # logger.info("how many unrespected rules? %s", unrespected_constraint.sum())
-            # apply_penalty: Tensor = (target == rule_target) & unrespected_constraint
-            # apply_advantage: Tensor = (target == rule_target) & respected_constraint
-
-            # regularization_tensor[apply_advantage] = 0.5
         return regularization_tensor
 
     return regularization_fn
-
-
