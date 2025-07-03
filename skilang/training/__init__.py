@@ -58,7 +58,7 @@ def train_torch_model(
         dataset_assignments[feature.name] = feature.column
 
     for target_value in dataset.target.values:
-        dataset_assignments[target_value] = dataset.target.get_mapped_value(target_value)
+        dataset_assignments[target_value] = dataset.target.values[target_value]
 
     target_name: str = dataset.target.name
     instance_name: str = dataset.instance_name

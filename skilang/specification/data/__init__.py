@@ -1,7 +1,7 @@
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict
 from urllib.parse import urlparse
 
 import pandas as pd
@@ -12,13 +12,7 @@ import requests
 class Feature:
     name: str
     column: int
-    values: List[str]
-    mapping: Dict[str, int] = field(default_factory=dict)
-
-    def get_mapped_value(self, input_value: Any) -> Any:
-        if isinstance(input_value, str):
-            return self.mapping.get(input_value, input_value)
-        return input_value
+    values: Dict[str, int] = field(default_factory=dict)
 
 
 class Target(Feature):
@@ -101,7 +95,6 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
                 name=feature["name"],
                 column=index,
                 values=feature["values"],
-                mapping=feature["mapping"],
             )
             for index, feature in enumerate(current_dataset["features"])
         ]
@@ -109,7 +102,6 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
             name=current_dataset["target"]["name"],
             column=len(current_dataset["features"]),
             values=current_dataset["target"]["values"],
-            mapping=current_dataset["target"]["mapping"],
         )
 
         if "uri" in current_dataset["training"]:

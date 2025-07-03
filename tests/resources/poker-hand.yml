@@ -12,72 +12,52 @@ data:
 #      unpack: datasets/poker-hand/poker-hand-testing.data
     instance_name: hand
     features:
-      - name: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
-        values: &suits [hearts, spades, diamonds, clubs]
-        mapping: &suits_mapping
+      - &suit
+        name: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
+        values:
           hearts: 1
           spades: 2
           diamonds: 3
           clubs: 4
-      - name: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
-        values: &ranks [ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king]
-        mapping: &ranks_mapping
+        group: suits
+      - &rank
+        name: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
+        values:
           ace: 1
+          2: 2
+          3: 3
+          4: 4
+          5: 5
+          6: 6
+          7: 7
+          8: 8
+          9: 9
+          10: 10
           jack: 11
           queen: 12
           king: 13
-      - name: suit2 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank2 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-      - name: suit3 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank3 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-      - name: suit4 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank4 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-      - name: suit5 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank5 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-#      - group: suits
-#        features: [suit1, suit2, suit3, suit4, suit5]
-#      - group: ranks
-#        features: [rank1, rank2, rank3, rank4, rank5]
+        group: ranks
+      - { <<: *suit, name: suit2}
+      - { <<: *rank, name: rank2 }
+      - { <<: *suit, name: suit3}
+      - { <<: *rank, name: rank3 }
+      - { <<: *suit, name: suit4}
+      - { <<: *rank, name: rank4 }
+      - { <<: *suit, name: suit5}
+      - { <<: *rank, name: rank5 }
     target:
       name: Class
       values:
-        - nothing            # Nothing in hand; not a recognized poker hand
-        - one_pair           # One pair; one pair of equal ranks within five cards
-        - two_pairs          # Two pairs; two pairs of equal ranks within five cards
-        - three_of_a_kind    # Three of a kind; three equal ranks within five cards
-        - straight           # Straight; five cards, sequentially ranked with no gaps
-        - flush              # Flush; five cards with the same suit
-        - full_house         # Full house; pair + different rank three of a kind
-        - four_of_a_kind     # Four of a kind; four equal ranks within five cards
-        - straight_flush     # Straight flush; straight + flush
-        - royal_flush        # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
-      mapping:
-        nothing: 0
-        one_pair: 1
-        two_pairs: 2
-        three_of_a_kind: 3
-        straight: 4
-        flush: 5
-        full_house: 6
-        four_of_a_kind: 7
-        straight_flush: 8
-        royal_flush: 9
+        nothing: 0             # Nothing in hand; not a recognized poker hand
+        one_pair: 1            # One pair; one pair of equal ranks within five cards
+        two_pairs: 2           # Two pairs; two pairs of equal ranks within five cards
+        three_of_a_kind: 3     # Three of a kind; three equal ranks within five cards
+        straight: 4            # Straight; five cards, sequentially ranked with no gaps
+        flush: 5               # Flush; five cards with the same suit
+        full_house: 6          # Full house; pair + different rank three of a kind
+        four_of_a_kind: 7      # Four of a kind; four equal ranks within five cards
+        straight_flush: 8      # Straight flush; straight + flush
+        royal_flush: 9         # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
 
 
 optimization:
