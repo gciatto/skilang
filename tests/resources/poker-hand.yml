@@ -5,7 +5,7 @@ data:
       file: datasets/poker-hand/poker-hand-testing.csv
       # TODO: reminder - testing is used as training
     #      unpack: datasets/poker-hand/poker-hand-training-true.data
-#      type: csv(',')
+      type: csv(',')
 #      percent: 80%
     test:
       file: datasets/poker-hand/poker-hand-training.csv

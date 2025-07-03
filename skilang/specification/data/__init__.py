@@ -104,14 +104,16 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
             values=current_dataset["target"]["values"],
         )
 
+        separator: str = current_dataset["training"]["type"].split("'")[1]
+
         if "uri" in current_dataset["training"]:
             dest_folder: Path = spec_file_path / current_dataset["training"]["unpack"]
             download_and_extract(current_dataset["training"]["uri"], dest_folder)
-            training = pd.read_csv(dest_folder / current_dataset["training"]["file_name"])
-            test = pd.read_csv(dest_folder / current_dataset["test"]["file_name"])
+            training = pd.read_csv(dest_folder / current_dataset["training"]["file_name"], sep=separator)
+            test = pd.read_csv(dest_folder / current_dataset["test"]["file_name"], sep=separator)
         else:
-            training = pd.read_csv(spec_file_path / current_dataset["training"]["file"])
-            test = pd.read_csv(spec_file_path / current_dataset["test"]["file"])
+            training = pd.read_csv(spec_file_path / current_dataset["training"]["file"], sep=separator)
+            test = pd.read_csv(spec_file_path / current_dataset["test"]["file"], sep=separator)
 
         columns: List[str] = [feature.name for feature in features]
         columns.append(target.name)
