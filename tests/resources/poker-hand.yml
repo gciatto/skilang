@@ -13,7 +13,6 @@ data:
     instance_name: hand
     features:
       - name: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
-        column: 0
         values: &suits [hearts, spades, diamonds, clubs]
         mapping: &suits_mapping
           hearts: 1
@@ -21,7 +20,6 @@ data:
           diamonds: 3
           clubs: 4
       - name: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
-        column: 1
         values: &ranks [ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king]
         mapping: &ranks_mapping
           ace: 1
@@ -29,35 +27,27 @@ data:
           queen: 12
           king: 13
       - name: suit2 # ordinal (1-4) representing
-        column: 2
         values: *suits
         mapping: *suits_mapping
       - name: rank2 # numerical (1-13) representing
-        column: 3
         values: *ranks
         mapping: *ranks_mapping
       - name: suit3 # ordinal (1-4) representing
-        column: 4
         values: *suits
         mapping: *suits_mapping
       - name: rank3 # numerical (1-13) representing
-        column: 5
         values: *ranks
         mapping: *ranks_mapping
       - name: suit4 # ordinal (1-4) representing
-        column: 6
         values: *suits
         mapping: *suits_mapping
       - name: rank4 # numerical (1-13) representing
-        column: 7
         values: *ranks
         mapping: *ranks_mapping
       - name: suit5 # ordinal (1-4) representing
-        column: 8
         values: *suits
         mapping: *suits_mapping
       - name: rank5 # numerical (1-13) representing
-        column: 9
         values: *ranks
         mapping: *ranks_mapping
 #      - group: suits
@@ -66,7 +56,6 @@ data:
 #        features: [rank1, rank2, rank3, rank4, rank5]
     target:
       name: Class
-      column: 10
       values:
         - nothing            # Nothing in hand; not a recognized poker hand
         - one_pair           # One pair; one pair of equal ranks within five cards

@@ -99,15 +99,15 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
         features: List[Feature] = [
             Feature(
                 name=feature["name"],
-                column=feature["column"],
+                column=index,
                 values=feature["values"],
                 mapping=feature["mapping"],
             )
-            for feature in current_dataset["features"]
+            for index, feature in enumerate(current_dataset["features"])
         ]
         target: Target = Target(
             name=current_dataset["target"]["name"],
-            column=current_dataset["target"]["column"],
+            column=len(current_dataset["features"]),
             values=current_dataset["target"]["values"],
             mapping=current_dataset["target"]["mapping"],
         )
