@@ -1,12 +1,13 @@
 data:
   PokerHand:
     training: &dataset
-      file: https://archive.ics.uci.edu/static/public/2/adult.zip
-      unpack: datasets/adult/training.data
+      uri: https://archive.ics.uci.edu/static/public/2/adult.zip
+      unpack: datasets/adult
+      file_name: adult.data
       type: csv(',')
     test:
-      test: {<<: *dataset, file: datasets/adult/test.data}
-    instance_name: hand
+      {<<: *dataset, file_name: adult.test}
+    instance_name: person
     features:
       - name: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
         column: 0

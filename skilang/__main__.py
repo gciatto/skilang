@@ -25,9 +25,11 @@ def main():
     if not args.spec_file.is_file():
         raise FileNotFoundError(f"File not found: {args.spec_file}")
 
-    print(f"Reading from: {args.spec_file}")
-    specification: Dict = parse_specification(args.spec_file)
-    datasets: List[Dataset] = get_datasets(specification)
+    spec_file_path: Path = args.spec_file.resolve()
+    spec_file_dir: Path = spec_file_path.parent
+    print(f"Reading from: {spec_file_path}")
+    specification: Dict = parse_specification(spec_file_path)
+    datasets: List[Dataset] = get_datasets(specification, spec_file_dir)
     optimization: Optimization = get_optimization(specification)
     learnables: List[Learnable] = get_learnables(specification)
     knowledge: List[Rule] = get_knowledge(specification)

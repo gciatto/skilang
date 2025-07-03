@@ -6,7 +6,6 @@ tmp/
 .idea/
 .vscode/
 .DS_Store
-*.data
 demo/
 
 *~
