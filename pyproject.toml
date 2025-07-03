@@ -26,6 +26,7 @@ pytest = "^8.2.2"
 behave = "^1.2.6"
 ruff = "^0.11.5"
 types-pyyaml = "^6.0.12.20250402"
+types-requests = "^2.32.4.20250611"
 
 [tool.poe.tasks]
 bdd-test = "behave tests/features"
