@@ -1,15 +1,11 @@
 data:
   PokerHand:
     training: &dataset
-#      file: https://archive.ics.uci.edu/static/public/158/poker+hand.zip
-      file: datasets/poker-hand/poker-hand-testing.csv
-      # TODO: reminder - testing is used as training
-    #      unpack: datasets/poker-hand/poker-hand-training-true.data
-#      type: csv(',')
-#      percent: 80%
+      file: https://archive.ics.uci.edu/static/public/2/adult.zip
+      unpack: datasets/adult/training.data
+      type: csv(',')
     test:
-      file: datasets/poker-hand/poker-hand-training.csv
-#      unpack: datasets/poker-hand/poker-hand-testing.data
+      test: {<<: *dataset, file: datasets/adult/test.data}
     instance_name: hand
     features:
       - name: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}

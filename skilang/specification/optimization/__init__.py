@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, TypeVar
+from typing import Dict, TypeVar, Type
 
 T = TypeVar("T", bound=Enum)
 
@@ -34,7 +34,7 @@ class Optimization:
     batch_size: int
 
 
-def __get_enum_value(enum_class, name: str) -> T:
+def __get_enum_value(enum_class: Type[T], name: str) -> T:
     try:
         return enum_class(name)
     except ValueError:

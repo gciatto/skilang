@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Any
+from urllib.parse import urlparse
 
 import pandas as pd
 
@@ -45,6 +46,14 @@ class Dataset:
 
     def __post_init__(self):
         self.columns = self.training.columns.tolist()
+
+
+def __is_uri(string):
+    try:
+        result = urlparse(string)
+        return all([result.scheme, result.netloc])
+    except Exception:
+        return False
 
 
 def get_datasets(specification: Dict) -> List[Dataset]:
