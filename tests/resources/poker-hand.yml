@@ -69,7 +69,8 @@ optimization:
   batch_size: 512
 
 learnable:
-  PokerHand:
+  InjectedPokerHand:
+    destination: ../../models
     dataset: PokerHand
     inputs:
       - PokerHand.features
@@ -189,42 +190,42 @@ knowledge:
     clause: Flush(hand) & Maximum_Straight(hand)
 
 constraints:
-  - always: PokerHand(hand) == Class
+  - always: InjectedPokerHand(hand) == Class
     weight: 0.1
-  
+
   - if: Royal_flush(hand)
-    then: PokerHand(hand) == royal_flush
+    then: InjectedPokerHand(hand) == royal_flush
     weight: 0.9
 
-  # double implication is not adequate, because if Royal_flush(hand) is True, then Straight_flush(hand) is also True, yet PokerHand(hand) must output royal_flush
+  # double implication is not adequate, because if Royal_flush(hand) is True, then Straight_flush(hand) is also True, yet InjectedPokerHand(hand) must output royal_flush
   - if: Straight_flush(hand)
-    then: PokerHand(hand) == straight_flush
+    then: InjectedPokerHand(hand) == straight_flush
     weight: 0.9
 
   - if: Four_of_a_kind(hand)
-    then: PokerHand(hand) == four_of_a_kind
+    then: InjectedPokerHand(hand) == four_of_a_kind
     weight: 0.9
 
   - if: Full_house(hand)
-    then: PokerHand(hand) == full_house
+    then: InjectedPokerHand(hand) == full_house
     weight: 0.0
 
   - if: Flush(hand)
-    then: PokerHand(hand) == flush
+    then: InjectedPokerHand(hand) == flush
     weight: 0.8
 
   - if: Straight(hand)
-    then: PokerHand(hand) == straight
+    then: InjectedPokerHand(hand) == straight
     weight: 0.7
 
   - if: Three_of_a_kind(hand)
-    then: PokerHand(hand) == three_of_a_kind
+    then: InjectedPokerHand(hand) == three_of_a_kind
     weight: 0.5
 
   - if: Two_pairs(hand)
-    then: PokerHand(hand) == two_pairs
+    then: InjectedPokerHand(hand) == two_pairs
     weight: 0.1
 
   - if: Pair(hand)
-    then: PokerHand(hand) == one_pair
+    then: InjectedPokerHand(hand) == one_pair
     weight: 0.1

@@ -1,4 +1,5 @@
 import argparse
+import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -28,6 +29,7 @@ def main():
     spec_file_path: Path = args.spec_file.resolve()
     spec_file_dir: Path = spec_file_path.parent
     print(f"Reading from: {spec_file_path}")
+
     specification: Dict = parse_specification(spec_file_path)
     datasets: List[Dataset] = get_datasets(specification, spec_file_dir)
     optimization: Optimization = get_optimization(specification)
@@ -37,10 +39,11 @@ def main():
     trained_models: List[NeuralNetwork] = start_training(
         datasets, optimization, learnables, knowledge, constraints
     )
-    for model in trained_models:
-        # print(f"Trained model: {model}")
-        # print(f"Model parameters: {model.parameters()}")
-        model.save("PokerHand.pth")
+    for learnable, model in zip(learnables, trained_models):
+        relative_path = specification["learnable"][learnable.name]["destination"]
+        dest_path = spec_file_dir / relative_path / f"{learnable.name}.pth"
+        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+        model.save(dest_path)
 
 
 if __name__ == "__main__":

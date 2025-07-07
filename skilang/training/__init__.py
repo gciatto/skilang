@@ -74,7 +74,6 @@ def train_torch_model(
     epochs = optimization.epochs
     ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
     model.plot_loss()
-    model.save(f"{model_name}.pth")
     return model
 
 
