@@ -76,7 +76,7 @@ learnable:
     outputs:
       - source: features.Class
         transform: one_hot_encoding
-    type: feed_forward
+    type: neural_network
     layers:
       - linear:
           input: 10

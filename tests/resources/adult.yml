@@ -57,7 +57,7 @@ learnable:
     outputs:
       - source: features.income
         transform: ordinal
-    type: feed_forward
+    type: neural_network # TODO: inconsistent with code
     layers:
       - linear:
           input: 10
@@ -172,5 +172,5 @@ knowledge:
 constraints:
   - always: over50k(person) == income
     weight: 1
-  - global: SP(person[race], over50k(person)) <= 0.1
+  - global: SP(person[race], over50k(person)) <= 0.1 # TODO: to make it global
     weight: 10

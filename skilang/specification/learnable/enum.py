@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class LearnableType(Enum):
-    FEED_FORWARD = "feed_forward"
+    FEED_FORWARD = "neural_network"
     TRANSFORMER = "transformer"
 
 
