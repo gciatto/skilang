@@ -1,5 +1,5 @@
 data:
-  PokerHand:
+  adult:
     training: &dataset
       uri: https://archive.ics.uci.edu/static/public/2/adult.zip
       unpack: datasets/adult
@@ -9,73 +9,37 @@ data:
       {<<: *dataset, file_name: adult.test}
     instance_name: person
     features:
-      - name: suit1 # ordinal (1-4) representing {hearts, spades, diamonds, clubs}
-        values: &suits [hearts, spades, diamonds, clubs]
-        mapping: &suits_mapping
-          hearts: 1
-          spades: 2
-          diamonds: 3
-          clubs: 4
-      - name: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
-        values: &ranks [ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king]
-        mapping: &ranks_mapping
-          ace: 1
-          jack: 11
-          queen: 12
-          king: 13
-      - name: suit2 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank2 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-      - name: suit3 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank3 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-      - name: suit4 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank4 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-      - name: suit5 # ordinal (1-4) representing
-        values: *suits
-        mapping: *suits_mapping
-      - name: rank5 # numerical (1-13) representing
-        values: *ranks
-        mapping: *ranks_mapping
-#      - group: suits
-#        features: [suit1, suit2, suit3, suit4, suit5]
-#      - group: ranks
-#        features: [rank1, rank2, rank3, rank4, rank5]
+      - name: age
+        type: int
+      - name: workclass
+        values: [Private, Self-emp-not-inc, Self-emp-inc, Federal-gov, Local-gov, State-gov, Without-pay, Never-worked]
+      - name: fnlwgt
+        type: int
+      - name: education
+        values: [Bachelors, Some-college, 11th, HS-grad, Prof-school, Assoc-acdm, Assoc-voc, 9th, 7th-8th, 12th, Masters, 1st-4th, 10th, Doctorate, 5th-6th, Preschool]
+      - name: education_num
+        type: int
+      - name: marital_status
+        values: [Married-civ-spouse, Divorced, Never-married, Separated, Widowed, Married-spouse-absent, Married-AF-spouse]
+      - name: occupation
+        values: [Tech-support, Craft-repair, Other-service, Sales, Exec-managerial, Prof-specialty, Handlers-cleaners, Machine-op-inspct, Adm-clerical, Farming-fishing, Transport-moving, Priv-house-serv, Protective-serv, Armed-Forces]
+      - name: relationship
+        values: [Wife, Own-child, Husband, Not-in-family, Other-relative, Unmarried]
+      - name: race
+        values: [White, Asian-Pac-Islander, Amer-Indian-Eskimo, Other, Black]
+      - name: sex
+        values: [Female, Male]
+      - name: capital-gain
+        type: int
+      - name: capital-loss
+        type: int
+      - name: hours-per-week
+        type: int
+      - name: native-country
+        value: [United-States, Cambodia, England, Puerto-Rico, Canada, Germany, Outlying-US(Guam-USVI-etc), India, Japan, Greece, South, China, Cuba, Iran, Honduras, Philippines, Italy, Poland, Jamaica, Vietnam, Mexico, Portugal, Ireland, France, Dominican-Republic, Laos, Ecuador, Taiwan, Haiti, Columbia, Hungary, Guatemala, Nicaragua, Scotland, Thailand, Yugoslavia, El-Salvador, Trinadad&Tobago, Peru, Hong, Holand-Netherlands]
     target:
-      name: Class
-      values:
-        - nothing            # Nothing in hand; not a recognized poker hand
-        - one_pair           # One pair; one pair of equal ranks within five cards
-        - two_pairs          # Two pairs; two pairs of equal ranks within five cards
-        - three_of_a_kind    # Three of a kind; three equal ranks within five cards
-        - straight           # Straight; five cards, sequentially ranked with no gaps
-        - flush              # Flush; five cards with the same suit
-        - full_house         # Full house; pair + different rank three of a kind
-        - four_of_a_kind     # Four of a kind; four equal ranks within five cards
-        - straight_flush     # Straight flush; straight + flush
-        - royal_flush        # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
-      mapping:
-        nothing: 0
-        one_pair: 1
-        two_pairs: 2
-        three_of_a_kind: 3
-        straight: 4
-        flush: 5
-        full_house: 6
-        four_of_a_kind: 7
-        straight_flush: 8
-        royal_flush: 9
-
+      name: income
+      values: ["<=50K", ">50K"]
 
 optimization:
   epochs: 10
@@ -86,13 +50,13 @@ optimization:
   batch_size: 512
 
 learnable:
-  PokerHand:
-    dataset: PokerHand
+  over50k:
+    dataset: adult
     inputs:
-      - PokerHand.features
+      - adult.features
     outputs:
-      - source: features.Class
-        transform: one_hot_encoding
+      - source: features.income
+        transform: ordinal
     type: feed_forward
     layers:
       - linear:
@@ -201,47 +165,12 @@ knowledge:
   - rule: Royal_flush
     args: [hand]
     # BETTER_RULE: Straight_flush(hand) & contains(ace, hand.ranks)
-    # FIXME: the rule below will not work: it does not consider the case the case {10, 11, 12, 13, 1} (the rule above assumes that the case is handled by Straight)
+    # FIXME: the rule below will not work: it does not consider the case {10, 11, 12, 13, 1} (the rule above assumes that the case is handled by Straight)
 #    clause: Straight_flush(hand) & (hand[rank1] == ace | hand[rank2] == ace | hand[rank3] == ace | hand[rank4] == ace | hand[rank5] == ace)
     clause: Flush(hand) & Maximum_Straight(hand)
 
 constraints:
-  - always: PokerHand(hand) == Class
-    weight: 0.1
-  
-  - if: Royal_flush(hand)
-    then: PokerHand(hand) == royal_flush
-    weight: 0.9
-
-  # double implication is not adequate, because if Royal_flush(hand) is True, then Straight_flush(hand) is also True, yet PokerHand(hand) must output royal_flush
-  - if: Straight_flush(hand)
-    then: PokerHand(hand) == straight_flush
-    weight: 0.9
-
-  - if: Four_of_a_kind(hand)
-    then: PokerHand(hand) == four_of_a_kind
-    weight: 0.9
-
-  - if: Full_house(hand)
-    then: PokerHand(hand) == full_house
-    weight: 0.0
-
-  - if: Flush(hand)
-    then: PokerHand(hand) == flush
-    weight: 0.8
-
-  - if: Straight(hand)
-    then: PokerHand(hand) == straight
-    weight: 0.7
-
-  - if: Three_of_a_kind(hand)
-    then: PokerHand(hand) == three_of_a_kind
-    weight: 0.5
-
-  - if: Two_pairs(hand)
-    then: PokerHand(hand) == two_pairs
-    weight: 0.1
-
-  - if: Pair(hand)
-    then: PokerHand(hand) == one_pair
-    weight: 0.1
+  - always: over50k(person) == income
+    weight: 1
+  - global: SP(person[race], over50k(person)) <= 0.1
+    weight: 10

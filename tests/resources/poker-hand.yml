@@ -19,7 +19,7 @@ data:
           spades: 2
           diamonds: 3
           clubs: 4
-        group: suits
+        group: suits # TODO: implement groups
       - &rank
         name: rank1 # numerical (1-13) representing (1=ace, 2, 3, ..., 11=jack, 12=queen, 13=king)
         values:

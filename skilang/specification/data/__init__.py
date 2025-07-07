@@ -1,18 +1,26 @@
 import zipfile
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 from urllib.parse import urlparse
 
 import pandas as pd
 import requests
 
 
+class FeatureType(Enum):
+    CATEGORICAL = "categorical"
+    INTEGER = "int"
+    FLOAT = "float"
+
+
 @dataclass
 class Feature:
     name: str
     column: int
-    values: Dict[str, int] = field(default_factory=dict)
+    type: FeatureType
+    values: Optional[Dict[str, int]] = field(default_factory=dict)
 
 
 class Target(Feature):
@@ -94,13 +102,15 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
             Feature(
                 name=feature["name"],
                 column=index,
-                values=feature["values"],
+                type=FeatureType(feature.get("type", "categorical")),
+                values=feature.get("values", None),
             )
             for index, feature in enumerate(current_dataset["features"])
         ]
         target: Target = Target(
             name=current_dataset["target"]["name"],
             column=len(current_dataset["features"]),
+            type=FeatureType(current_dataset["target"].get("type", "categorical")),
             values=current_dataset["target"]["values"],
         )
 
