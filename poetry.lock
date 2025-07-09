@@ -2363,13 +2363,13 @@ six = ">=1.5"
 
 [[package]]
 name = "pytorchic"
-version = "4.0.1"
+version = "4.0.2"
 description = "A framework for instantly building flexible PyTorch models."
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "pytorchic-4.0.1-py3-none-any.whl", hash = "sha256:cfbfbbaa64962f73ab55bc3d743af27e6a7c75242a224b6694801eb996ca22c6"},
-    {file = "pytorchic-4.0.1.tar.gz", hash = "sha256:c6c0c29053e5f19f7b3d455e11c7b073546ad18b8e6c92f3505407e88bf72e4a"},
+    {file = "pytorchic-4.0.2-py3-none-any.whl", hash = "sha256:183dc11f5b3fb1596e7d477a3950396f196489e5ea336af855a9b078dc1f5a67"},
+    {file = "pytorchic-4.0.2.tar.gz", hash = "sha256:d9fa7dfff223603ca16b1ab9a4b5a7bec1436b47e41f4836a4f8c5490f4526f9"},
 ]
 
 [package.dependencies]
