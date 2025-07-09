@@ -22,6 +22,16 @@ def variance(iterable: List | Tensor) -> float | Tensor:
         raise TypeError(f"unsupported type {type(iterable)}")
 
 
+def mean(iterable: List | Tensor) -> float | Tensor:
+    if isinstance(iterable, List):
+        return sum(iterable) / len(iterable)
+    elif isinstance(iterable, Tensor):
+        dim: int = 1 if iterable.ndim > 1 else 0
+        return torch.mean(iterable.to(torch.float), dim=dim)
+    else:
+        raise TypeError(f"unsupported type {type(iterable)}")
+
+
 def contains(iterable: List | Tensor, value: int) -> bool | Tensor:
     if isinstance(iterable, List):
         return value in set(iterable)

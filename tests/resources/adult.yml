@@ -45,13 +45,24 @@ optimization:
   epochs: 10
   optimizer: adam
   learning_rate: 0.001
-  loss: cross_entropy
+  loss: nll
   metrics: [accuracy]
-  batch_size: 512
+  batch_size: 64
 
 learnable:
   over50k:
+    destination: ../../models
     dataset: adult
+#    encodings:
+#      - features.workclass: ordinal
+#      - features.education: ordinal
+#      - features.marital_status: ordinal
+#      - features.occupation: ordinal
+#      - features.relationship: ordinal
+#      - features.race: ordinal
+#      - features.sex: ordinal
+#      - features.native_country: ordinal
+#      - features.income: ordinal
     inputs:
       - adult.features
     outputs:
@@ -60,37 +71,28 @@ learnable:
     type: neural_network # TODO: inconsistent with code
     layers:
       - linear:
-          input: 10
-          output: 128
+          input: 14
+          output: 64
           activation: relu
   #        regularization: l2
 #          dropout: 0.2
       - linear:
-          input: 128
-          output: 128
+          input: 64
+          output: 64
           activation: relu
-          dropout: 0.2
+#          dropout: 0.2
       - linear:
-          input: 128
-          output: 128
-          activation: relu
-          dropout: 0.2
-      - linear:
-          input: 128
-          output: 128
-          activation: relu
-      - linear:
-          input: 128
-          output: 10
+          input: 64
+          output: 2
           activation: softmax
 
 knowledge:
   - rule: SP
-    args: [race_column, predicted_income]
-    clause: "P(predicted_income \| race_column = a) - P(predicted_income \| race_column = b)" # TODO: to implement
+    args: [sensitive, target]
+    clause: mean(target[sensitive == 0]) - mean(target[sensitive == 1])
 
-constraints:
-  - always: over50k(person) == income
-    weight: 1
-  - global: SP(person[race], over50k(person)) <= 0.1 # TODO: to make it global
-    weight: 10
+#constraints:
+#  - always: over50k(person) == income
+#    weight: 1
+#  - always: SP(person[race], over50k(person)) <= 0.1 # TODO: to make it global
+#    weight: 10
