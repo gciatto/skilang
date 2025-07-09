@@ -34,6 +34,7 @@ class SkiTrainer(AbstractTrainer):
     ) -> Tuple[Tensor, torch.types.Number]:
         pred: Tensor = self.model(input_batch)
         loss: Tensor = loss_fn(pred, target)
-        if loss.dim() != 0:
-            loss = loss.sum()
-        return pred, loss.item()
+        modified_loss = loss + self.regularization_fn(input_batch, pred, target)
+        if modified_loss.dim() != 0:
+            modified_loss = modified_loss.sum()
+        return pred, modified_loss.item()
