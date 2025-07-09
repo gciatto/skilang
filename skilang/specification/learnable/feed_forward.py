@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from skilang.specification.learnable.base import Learnable, Backend
 from skilang.specification.learnable.enum import LayerType, Activation, Regularization
@@ -10,10 +10,10 @@ class Layer:
     type: LayerType
     input_size: int
     output_size: int
-    activation: Activation = None
-    regularization: Regularization = None
-    dropout: float = 0.0
-    kernel_size: int = None
+    activation: Optional[Activation] = None
+    regularization: Optional[Regularization] = None
+    dropout: Optional[float] = None
+    kernel_size: Optional[int] = None
 
 
 @dataclass

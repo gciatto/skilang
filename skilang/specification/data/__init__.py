@@ -98,20 +98,28 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
     datasets_spec: Dict = specification["data"]
     datasets: List[Dataset] = []
     for dataset_name, current_dataset in datasets_spec.items():
-        features: List[Feature] = [
-            Feature(
-                name=feature["name"],
-                column=index,
-                type=FeatureType(feature.get("type", "categorical")),
-                values=feature.get("values", None),
+        features: List[Feature] = []
+        for index, feature in enumerate(current_dataset["features"]):
+            feature_values = feature.get("values", None)
+            if isinstance(feature_values, List):
+                feature_values = {value: i for i, value in enumerate(feature_values)}
+            features.append(
+                Feature(
+                    name=feature["name"],
+                    column=index,
+                    type=FeatureType(feature.get("type", "categorical")),
+                    values=feature_values,
+                )
             )
-            for index, feature in enumerate(current_dataset["features"])
-        ]
+
+        target_values = current_dataset["target"].get("values", None)
+        if isinstance(target_values, List):
+            target_values = {value: i for i, value in enumerate(target_values)}
         target: Target = Target(
             name=current_dataset["target"]["name"],
             column=len(current_dataset["features"]),
             type=FeatureType(current_dataset["target"].get("type", "categorical")),
-            values=current_dataset["target"]["values"],
+            values=target_values,
         )
 
         separator: str = current_dataset["training"]["type"].split("'")[1]
