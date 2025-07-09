@@ -2,6 +2,7 @@ from typing import List
 
 import pandas as pd
 import torch
+from sklearn.preprocessing import OrdinalEncoder, LabelEncoder, StandardScaler
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 from torchic.nn import NeuralNetwork
@@ -61,11 +62,32 @@ def create_torch_dataloader(dataset: pd.DataFrame, batch_size: int) -> DataLoade
     :param batch_size: The batch size for the DataLoader.
     :return: A DataLoader object.
     """
-    X = dataset.iloc[:, :-1].values
-    y = dataset.iloc[:, -1].values
 
-    X = torch.tensor(X, dtype=torch.float32)
-    y = torch.tensor(y, dtype=torch.float32)
+    # for NON Adult dataset
+    # X = dataset.iloc[:, :-1].values
+    # y = dataset.iloc[:, -1].values
+    #
+    # X = torch.tensor(X, dtype=torch.float32)
+    # y = torch.tensor(y, dtype=torch.float32)
+
+    X_raw = dataset.iloc[:, :-1]
+    y_raw = dataset.iloc[:, -1]
+
+    categorical_cols = X_raw.select_dtypes(include=["object", "category"]).columns
+    encoder = OrdinalEncoder()
+    X_encoded = X_raw.copy()
+    X_encoded[categorical_cols] = encoder.fit_transform(X_raw[categorical_cols])
+
+    # # Scale features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_encoded)
+
+    # Encode target
+    y_encoded = LabelEncoder().fit_transform(y_raw)
+
+    # Convert to tensors
+    X = torch.tensor(X_scaled, dtype=torch.float32)
+    y = torch.tensor(y_encoded, dtype=torch.float32)
 
     tensor_dataset = TensorDataset(X, y)
     return DataLoader(tensor_dataset, batch_size=batch_size, shuffle=True)
