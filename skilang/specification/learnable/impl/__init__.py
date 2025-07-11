@@ -86,7 +86,7 @@ def create_torch_dataloader(dataset: pd.DataFrame, batch_size: int) -> DataLoade
     y_encoded = LabelEncoder().fit_transform(y_raw)
 
     # Convert to tensors
-    X = torch.tensor(X_scaled, dtype=torch.float32)
+    X = torch.tensor(X_encoded, dtype=torch.float32)
     y = torch.tensor(y_encoded, dtype=torch.float32)
 
     tensor_dataset = TensorDataset(X, y)

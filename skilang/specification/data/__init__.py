@@ -34,7 +34,7 @@ class Dataset:
 
     :param name: name of dataset
     :param features: the list of features
-    :param target: target feature
+    :param targets: the list of target features
     :param training: DataFrame of training dataset
     :param test: DataFrame of test dataset
     """
@@ -42,7 +42,7 @@ class Dataset:
     name: str
     instance_name: str
     features: List[Feature]
-    target: Target
+    targets: List[Target]
     training: pd.DataFrame
     test: pd.DataFrame
     columns: List[str] = field(init=False)
@@ -112,15 +112,21 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
                 )
             )
 
-        target_values = current_dataset["target"].get("values", None)
-        if isinstance(target_values, List):
-            target_values = {value: i for i, value in enumerate(target_values)}
-        target: Target = Target(
-            name=current_dataset["target"]["name"],
-            column=len(current_dataset["features"]),
-            type=FeatureType(current_dataset["target"].get("type", "categorical")),
-            values=target_values,
-        )
+        targets: List[Target] = []
+        target_column: int = len(current_dataset["features"])
+        for target_feature in current_dataset.get("targets", []):
+            target_values = target_feature.get("values", None)
+            if isinstance(target_values, List):
+                target_values = {value: i for i, value in enumerate(target_values)}
+            targets.append(
+                Target(
+                    name=target_feature["name"],
+                    column=target_column,
+                    type=FeatureType(target_feature.get("type", "categorical")),
+                    values=target_values,
+                )
+            )
+            target_column += 1
 
         separator: str = current_dataset["training"]["type"].split("'")[1]
 
@@ -134,7 +140,7 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
             test = pd.read_csv(spec_file_path / current_dataset["test"]["file"], sep=separator)
 
         columns: List[str] = [feature.name for feature in features]
-        columns.append(target.name)
+        columns += [target.name for target in targets]
 
         training.columns = columns
         test.columns = columns
@@ -144,7 +150,7 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
                 name=dataset_name,
                 instance_name=current_dataset["instance_name"],
                 features=features,
-                target=target,
+                targets=targets,
                 training=training,
                 test=test,
             )

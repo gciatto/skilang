@@ -57,10 +57,13 @@ def train_torch_model(
     for feature in dataset.features:
         dataset_assignments[feature.name] = feature.column
 
-    for target_value in dataset.target.values:
-        dataset_assignments[target_value] = dataset.target.values[target_value]
+    for target in dataset.targets:
+        for target_name, target_value in target.values.items():
+            dataset_assignments[target_name] = target_value
 
-    target_name: str = dataset.target.name
+    target_names: List[str] = [target.name for target in dataset.targets]
+    # TODO: support multiple targets
+    target_name: str = target_names[0]
     instance_name: str = dataset.instance_name
 
     ski_trainer = SkiTrainer(

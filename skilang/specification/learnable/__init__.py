@@ -10,7 +10,9 @@ def __parse_layers(layer_specs: List[Dict]) -> List[Layer]:
     for item in layer_specs:
         layer_type_str, params = item.popitem()
 
-        activation: Optional[Activation] = Activation(params.get("activation")) if params.get("activation") else None
+        activation: Optional[Activation] = (
+            Activation(params.get("activation")) if params.get("activation") else None
+        )
         regularization: Optional[Regularization] = (
             Regularization(params.get("regularization")) if params.get("regularization") else None
         )

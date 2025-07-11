@@ -37,15 +37,15 @@ data:
         type: int
       - name: native-country
         value: [United-States, Cambodia, England, Puerto-Rico, Canada, Germany, Outlying-US(Guam-USVI-etc), India, Japan, Greece, South, China, Cuba, Iran, Honduras, Philippines, Italy, Poland, Jamaica, Vietnam, Mexico, Portugal, Ireland, France, Dominican-Republic, Laos, Ecuador, Taiwan, Haiti, Columbia, Hungary, Guatemala, Nicaragua, Scotland, Thailand, Yugoslavia, El-Salvador, Trinadad&Tobago, Peru, Hong, Holand-Netherlands]
-    target:
-      name: income
-      values: ["<=50K", ">50K"]
+    targets:
+      - name: income
+        values: ["<=50K", ">50K"]
 
 optimization:
   epochs: 10
   optimizer: adam
   learning_rate: 0.001
-  loss: nll
+  loss: cross_entropy
   metrics: [accuracy]
   batch_size: 64
 
@@ -53,16 +53,16 @@ learnable:
   over50k:
     destination: ../../models
     dataset: adult
-#    encodings:
-#      - features.workclass: ordinal
-#      - features.education: ordinal
-#      - features.marital_status: ordinal
-#      - features.occupation: ordinal
-#      - features.relationship: ordinal
-#      - features.race: ordinal
-#      - features.sex: ordinal
-#      - features.native_country: ordinal
-#      - features.income: ordinal
+    encodings:
+      - features.workclass: ordinal
+      - features.education: ordinal
+      - features.marital_status: ordinal
+      - features.occupation: ordinal
+      - features.relationship: ordinal
+      - features.race: ordinal
+      - features.sex: ordinal
+      - features.native_country: ordinal
+      - targets.income: ordinal
     inputs:
       - adult.features
     outputs:
@@ -91,8 +91,10 @@ knowledge:
     args: [sensitive, target]
     clause: mean(target[sensitive == 0]) - mean(target[sensitive == 1])
 
-#constraints:
-#  - always: over50k(person) == income
-#    weight: 1
+constraints:
+  - always: over50k(person) == income
+    weight: 1
+  - always: person[race]
+    weight: 10
 #  - always: SP(person[race], over50k(person)) <= 0.1 # TODO: to make it global
 #    weight: 10
