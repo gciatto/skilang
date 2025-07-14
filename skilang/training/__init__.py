@@ -90,6 +90,7 @@ def train_torch_model(
     optimizer = get_torch_optimizer(optimization.optimizer, model.parameters(), optimization.learning_rate)
     epochs = optimization.epochs
     ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
+
     model.plot_loss()
     return model
 
