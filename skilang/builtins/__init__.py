@@ -32,6 +32,15 @@ def mean(iterable: List | Tensor) -> float | Tensor:
         raise TypeError(f"unsupported type {type(iterable)}")
 
 
+def abs(iterable: List | Tensor) -> float | Tensor:
+    if isinstance(iterable, List):
+        return torch.abs(tensor(iterable))
+    elif isinstance(iterable, Tensor):
+        return torch.abs(iterable)
+    else:
+        raise TypeError(f"unsupported type {type(iterable)}")
+
+
 def contains(iterable: List | Tensor, value: int) -> bool | Tensor:
     if isinstance(iterable, List):
         return value in set(iterable)
