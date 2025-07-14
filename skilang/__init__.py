@@ -440,9 +440,6 @@ class Symbol(Formula):
         return Predicate(self.name, *[self._force_formula(arg) for arg in args])
 
 
-evaluated_predicates: Dict[str, Callable] = {}
-
-
 class Predicate(Formula, ArgsMixin):
     def __init__(self, functor: str, *args: Formula):
         self.functor = functor
@@ -484,11 +481,6 @@ class Predicate(Formula, ArgsMixin):
         kwargs_without_functor = kwargs.copy()
         kwargs_without_functor.pop(self.functor)
         args = [arg.evaluate(**kwargs_without_functor) for arg in self.args]
-
-        # if self.functor in evaluated_predicates.keys():
-        #     return evaluated_predicates[self.functor](*args)
-        # else:
-        #     evaluated_predicates[self.functor] = function
         return function(*args)
 
 
@@ -501,7 +493,6 @@ class SymbolProvider(Dict[str, object]):
 
 
 def parse(string: str) -> Formula:
-    evaluated_predicates.clear()
     with Formula._comparison_operators_as_builders():
         preprocessed_input: str = preprocessing(string)
         return eval(preprocessed_input, SymbolProvider())
