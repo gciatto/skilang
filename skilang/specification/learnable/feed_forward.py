@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from skilang.specification.learnable.base import Learnable, Backend
-from skilang.specification.learnable.enum import LayerType, Activation, Regularization
+from skilang.specification.learnable.enum import LayerType, Activation, Regularization, EncodingType
 
 
 @dataclass
@@ -21,10 +21,13 @@ class FeedForward(Learnable):
     layers: List[Layer] = field(default_factory=list)
 
 
-def create_feed_forward(name: str, dataset_name: str, backend: Backend, layers: List[Layer]) -> FeedForward:
+def create_feed_forward(
+    name: str, dataset_name: str, backend: Backend, encodings: Dict[str, EncodingType], layers: List[Layer]
+) -> FeedForward:
     return FeedForward(
         name=name,
         dataset_name=dataset_name,
+        encodings=encodings,
         backend=backend,
         layers=layers,
     )

@@ -54,15 +54,15 @@ learnable:
     destination: ../../models
     dataset: adult
     encodings:
-      - features.workclass: ordinal
-      - features.education: ordinal
-      - features.marital_status: ordinal
-      - features.occupation: ordinal
-      - features.relationship: ordinal
-      - features.race: ordinal
-      - features.sex: ordinal
-      - features.native_country: ordinal
-      - targets.income: ordinal
+      features.workclass: ordinal
+      features.education: ordinal
+      features.marital_status: ordinal
+      features.occupation: ordinal
+      features.relationship: ordinal
+      features.race: ordinal
+      features.sex: ordinal
+      features.native_country: ordinal
+      targets.income: ordinal
     inputs:
       - adult.features
     outputs:
@@ -89,12 +89,10 @@ learnable:
 knowledge:
   - rule: SP
     args: [sensitive, target]
-    clause: mean(target[sensitive == 0]) - mean(target[sensitive == 1])
+    clause: abs(abs(mean(target[sensitive == White])) - abs(mean(target[sensitive != White])))
 
 constraints:
   - always: over50k(person) == income
     weight: 1
-  - always: person[race]
+  - always: SP(person[race], over50k(person)) <= 0.1
     weight: 10
-#  - always: SP(person[race], over50k(person)) <= 0.1 # TODO: to make it global
-#    weight: 10

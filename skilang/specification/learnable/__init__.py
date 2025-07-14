@@ -1,7 +1,14 @@
 from typing import List, Dict, Optional
 
 from skilang.specification.learnable.base import Learnable
-from skilang.specification.learnable.enum import LayerType, Activation, Regularization, Backend, LearnableType
+from skilang.specification.learnable.enum import (
+    LayerType,
+    Activation,
+    Regularization,
+    Backend,
+    LearnableType,
+    EncodingType,
+)
 from skilang.specification.learnable.feed_forward import Layer, create_feed_forward
 
 
@@ -35,11 +42,16 @@ def get_learnables(spec: Dict) -> List[Learnable]:
             raise ValueError(f"Missing dataset for learnable '{name}'")
 
         learnable_type = LearnableType(props["type"])
+
+        encodings: Dict[str, EncodingType] = {
+            feature: EncodingType(encoding) for feature, encoding in props.get("encodings", {}).items()
+        }
+
         backend = Backend(props.get("backend", Backend.PYTORCH.value))
 
         if learnable_type == LearnableType.FEED_FORWARD:
             layers = __parse_layers(props["layers"])
-            learnables.append(create_feed_forward(name, props["dataset"], backend, layers))
+            learnables.append(create_feed_forward(name, props["dataset"], backend, encodings, layers))
 
         # Add support for more learnable types here
 

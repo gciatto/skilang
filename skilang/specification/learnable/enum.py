@@ -6,6 +6,11 @@ class LearnableType(Enum):
     TRANSFORMER = "transformer"
 
 
+class EncodingType(Enum):
+    ORDINAL = "ordinal"
+    ONE_HOT = "ohe"
+
+
 class Backend(Enum):
     PYTORCH = "pytorch"
     TENSORFLOW = "tensorflow"

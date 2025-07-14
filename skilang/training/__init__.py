@@ -9,9 +9,11 @@ from skilang.specification.constraints import Constraint, ConstraintType
 from skilang.specification.data import Dataset
 from skilang.specification.knowledge import Rule, get_rules_assignments
 from skilang.specification.learnable import Learnable, Backend
+from skilang.specification.learnable.enum import EncodingType
 from skilang.specification.learnable.impl import create_torch_model, create_torch_dataloader
 from skilang.specification.optimization import Optimization
 from skilang.specification.optimization.impl import get_torch_loss, get_torch_optimizer
+from skilang.training.encodings import encode_dataset
 from skilang.training.skitrainer import SkiTrainer
 
 
@@ -32,8 +34,9 @@ def start_training(
 
         if learnable.backend == Backend.PYTORCH:
             model: NeuralNetwork = create_torch_model(learnable)
+            encodings: Dict[str, EncodingType] = learnable.encodings
             trained_model = train_torch_model(
-                learnable.name, model, dataset, optimization, knowledge, constraints
+                learnable.name, model, dataset, encodings, optimization, knowledge, constraints
             )
             trained_models.append(trained_model)
         else:
@@ -46,20 +49,31 @@ def train_torch_model(
     model_name: str,
     model: NeuralNetwork,
     dataset: Dataset,
+    encodings: Dict[str, EncodingType],
     optimization: Optimization,
     knowledge: List[Rule],
     constraints: List[Constraint],
 ) -> NeuralNetwork:
+    mappings: Dict[str, Dict[str, float]] = {}
+    if len(encodings) != 0:
+        dataset, mappings = encode_dataset(dataset, encodings)
+
     train_loader: DataLoader = create_torch_dataloader(dataset.training, optimization.batch_size)
     test_loader: DataLoader = create_torch_dataloader(dataset.test, optimization.batch_size)
 
-    dataset_assignments: Dict[str, int] = {}
+    dataset_assignments: Dict[str, float] = {}
+
+    if len(mappings) != 0:
+        for feature_name, values in mappings.items():
+            for value, encoded_value in values.items():
+                dataset_assignments[value] = encoded_value
+
     for feature in dataset.features:
         dataset_assignments[feature.name] = feature.column
 
     for target in dataset.targets:
-        for target_name, target_value in target.values.items():
-            dataset_assignments[target_name] = target_value
+        for t_name, t_value in target.values.items():
+            dataset_assignments[t_name] = t_value
 
     target_names: List[str] = [target.name for target in dataset.targets]
     # TODO: support multiple targets
@@ -101,10 +115,14 @@ def create_regularization_fn(
 
         # Add the model output to the assignments
         batch_assignments.update({model_name: create_model_output_fn(pred)})
+        stripped_dataset_assignments = {k.strip(): v for k, v in dataset_assignments.items()}
+
         rules_assignments: Dict[str, Callable] = get_rules_assignments(
-            knowledge, dataset_assignments | batch_assignments
+            knowledge, stripped_dataset_assignments | batch_assignments
         )
-        assignments: Dict[str, Callable] = dataset_assignments | batch_assignments | rules_assignments
+        assignments: Dict[str, Callable] = (
+            stripped_dataset_assignments | batch_assignments | rules_assignments
+        )
 
         for index, constraint in enumerate(constraints):
             respected_constraint = constraint.clause.evaluate(**assignments)
