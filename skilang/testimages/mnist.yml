@@ -1,0 +1,75 @@
+data:
+  MNIST:
+    training: &dataset
+      uri: https://www.kaggle.com/api/v1/datasets/download/hojjatk/mnist-dataset
+      unpack: datasets/archive
+      file_name: adult.data
+      type: csv(',')
+    test:
+      {<<: *dataset, file_name: adult.test}
+    instance: [x, y]
+    features:
+      - name: age
+        type: int
+      - name: workclass
+        values: [Private, Self-emp-not-inc, Self-emp-inc, Federal-gov, Local-gov, State-gov, Without-pay, Never-worked]
+
+    targets:
+      - name: value
+        values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+optimization:
+  epochs: 10
+  optimizer: adam
+  learning_rate: 0.001
+  loss: cross_entropy
+  metrics: [accuracy]
+  batch_size: 64
+
+learnable:
+  sum:
+    destination: ../../models
+    dataset: adult
+    encodings:
+      features.workclass: ordinal
+      features.education: ordinal
+      features.marital_status: ordinal
+      features.occupation: ordinal
+      features.relationship: ordinal
+      features.race: ordinal
+      features.sex: ordinal
+      features.native_country: ordinal
+      targets.income: ordinal
+    inputs:
+      - adult.features
+    outputs:
+      - source: features.income
+        transform: ordinal
+    type: neural_network # TODO: inconsistent with code
+    layers:
+      - linear:
+          input: 14
+          output: 64
+          activation: relu
+  #        regularization: l2
+#          dropout: 0.2
+      - linear:
+          input: 64
+          output: 64
+          activation: relu
+#          dropout: 0.2
+      - linear:
+          input: 64
+          output: 2
+          activation: softmax
+
+knowledge:
+  - rule: SP
+    args: [sensitive, target]
+    clause: abs(abs(mean(target[sensitive == White])) - abs(mean(target[sensitive != White])))
+
+constraints:
+  - always: over50k(person) == income
+    weight: 1
+  - always: SP(person[race], over50k(person)) <= 0.1
+    weight: 10
