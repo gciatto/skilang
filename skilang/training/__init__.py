@@ -17,6 +17,19 @@ from skilang.training.encodings import encode_dataset
 from skilang.training.skitrainer import SkiTrainer
 
 
+def instantiate_models(*learnables: Learnable) -> NeuralNetwork | List[NeuralNetwork]:
+    models: List[NeuralNetwork] = []
+    for learnable in learnables:
+        if learnable.backend == Backend.PYTORCH:
+            model: NeuralNetwork = create_torch_model(learnable)
+            models.append(model)
+        else:
+            raise ValueError(f"Unsupported backend: {learnable.backend}")
+    if len(models) == 1:
+        return models[0]
+    return models
+
+
 def start_training(
     datasets: List[Dataset],
     optimization: Optimization,
@@ -33,7 +46,7 @@ def start_training(
         dataset: Dataset = next(dataset for dataset in datasets if dataset.name == learnable.dataset_name)
 
         if learnable.backend == Backend.PYTORCH:
-            model: NeuralNetwork = create_torch_model(learnable)
+            model: NeuralNetwork = instantiate_models(learnable)
             encodings: Dict[str, EncodingType] = learnable.encodings
             trained_model = train_torch_model(
                 learnable.name, model, dataset, encodings, optimization, knowledge, constraints
