@@ -45,19 +45,19 @@ data:
       - { <<: *rank, name: rank4 }
       - { <<: *suit, name: suit5}
       - { <<: *rank, name: rank5 }
-    target:
-      name: Class
-      values:
-        nothing: 0             # Nothing in hand; not a recognized poker hand
-        one_pair: 1            # One pair; one pair of equal ranks within five cards
-        two_pairs: 2           # Two pairs; two pairs of equal ranks within five cards
-        three_of_a_kind: 3     # Three of a kind; three equal ranks within five cards
-        straight: 4            # Straight; five cards, sequentially ranked with no gaps
-        flush: 5               # Flush; five cards with the same suit
-        full_house: 6          # Full house; pair + different rank three of a kind
-        four_of_a_kind: 7      # Four of a kind; four equal ranks within five cards
-        straight_flush: 8      # Straight flush; straight + flush
-        royal_flush: 9         # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
+    targets:
+      - name: Class
+        values:
+          nothing: 0             # Nothing in hand; not a recognized poker hand
+          one_pair: 1            # One pair; one pair of equal ranks within five cards
+          two_pairs: 2           # Two pairs; two pairs of equal ranks within five cards
+          three_of_a_kind: 3     # Three of a kind; three equal ranks within five cards
+          straight: 4            # Straight; five cards, sequentially ranked with no gaps
+          flush: 5               # Flush; five cards with the same suit
+          full_house: 6          # Full house; pair + different rank three of a kind
+          four_of_a_kind: 7      # Four of a kind; four equal ranks within five cards
+          straight_flush: 8      # Straight flush; straight + flush
+          royal_flush: 9         # Royal flush; {Ace, King, Queen, Jack, Ten} + flush
 
 
 optimization:
