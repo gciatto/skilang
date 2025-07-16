@@ -32,9 +32,9 @@ def encode_dataset(
 
 
 def ordinal_encoding(
-    dataset: 'Dataset',
+    dataset: "Dataset",
     columns: List[str],
-) -> Tuple['Dataset', Dict[str, Dict[str, float]]]:
+) -> Tuple["Dataset", Dict[str, Dict[str, float]]]:
     encoder = OrdinalEncoder()
     scaler = StandardScaler()
     label_encoder = LabelEncoder()
@@ -81,7 +81,9 @@ def ordinal_encoding(
         if y_raw.name == targets[0]:
             y_encoded_array = label_encoder.fit_transform(y_raw)
             y_encoded_series = pd.Series(y_encoded_array, name=y_raw.name, index=y_raw.index)
-            target_mapping = {y_raw.name: dict(zip(label_encoder.classes_, range(len(label_encoder.classes_))))}
+            target_mapping = {
+                y_raw.name: dict(zip(label_encoder.classes_, range(len(label_encoder.classes_))))
+            }
             encoded_datasets[index] = pd.concat([X_final, y_encoded_series], axis=1)
             final_mappings = features_mappings | target_mapping
         else:
