@@ -24,7 +24,7 @@ class SkiTrainer(AbstractTrainer):
         # Backpropagation
         # if loss is not reduced to a scalar
         if modified_loss.dim() != 0:
-            modified_loss = modified_loss.sum()
+            modified_loss = modified_loss
 
         modified_loss.backward()
         return pred, modified_loss.item()
@@ -36,5 +36,5 @@ class SkiTrainer(AbstractTrainer):
         loss: Tensor = loss_fn(pred, target)
         modified_loss = loss + self.regularization_fn(input_batch, pred, target)
         if modified_loss.dim() != 0:
-            modified_loss = modified_loss.sum()
+            modified_loss = modified_loss
         return pred, modified_loss.item()

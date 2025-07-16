@@ -47,7 +47,7 @@ def is_not_close(a: Tensor, b: float, tol: float = 1e-4) -> bool:
     return abs(a - b) > tol
 
 
-def statistical_parity(predictions: torch.Tensor, protected_attribute: np.array) -> float:
+def statistical_parity(predictions: torch.Tensor, protected_attribute: torch.Tensor) -> float:
     """
     Calculate the statistical parity difference.
     :param predictions: Model predictions (tensor of shape [N, num_classes])
@@ -55,7 +55,7 @@ def statistical_parity(predictions: torch.Tensor, protected_attribute: np.array)
     :return: Statistical parity difference
     """
     # Convert predictions to binary (1 for positive class, 0 for negative class)
-    unique_values = np.unique(protected_attribute)
+    unique_values = torch.unique(protected_attribute).tolist()
     value_0 = max(unique_values)
 
     # Calculate the proportion of positive predictions for each group

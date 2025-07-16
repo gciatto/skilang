@@ -1,5 +1,8 @@
 import fire
 from pathlib import Path
+
+import numpy as np
+
 from evaluation.results import PATH as RESULTS_PATH
 from typing import Dict, List
 import torch
@@ -64,25 +67,23 @@ def main(spec_file: str, protected_idx: int = 8, population: int = 5):
                 trained_model = load_model(model_name)
 
                 predictions = []
+                protected_values = []
                 true_classes = []
                 with torch.no_grad():
                     for batch in test_loader:
                         inputs, targets = batch
                         inputs = inputs.to(trained_model.device())
                         outputs = trained_model(inputs)
-                        outputs1 = trained_model(inputs)
-                        outputs2 = trained_model(inputs)
                         predictions.append(outputs)
                         true_classes.append(targets)
+                        protected_values.append(inputs[:, protected_idx])
 
                 predictions = torch.cat(predictions, dim=0)
+                protected_values = torch.cat(protected_values, dim=0)
                 true_classes = torch.cat(true_classes, dim=0)
-
-                protected_values = dataset.test.iloc[:, protected_idx].values
-
                 predicted_classes = predictions.argmax(dim=1)
 
-                sp_values.append(statistical_parity(predicted_classes.cpu(), protected_values))
+                sp_values.append(statistical_parity(predicted_classes, protected_values))
                 accuracy_values.append(accuracy_score(true_classes.cpu(), predicted_classes.cpu()))
                 f1_values.append(f1_score(true_classes.cpu(), predicted_classes.cpu(), average="weighted"))
 

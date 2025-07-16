@@ -131,34 +131,37 @@ def create_regularization_fn(
 
         for index, constraint in enumerate(constraints):
             respected_constraint = constraint.clause.evaluate(**assignments)
-            respected_condition: Tensor = torch.tensor([])
-
-            if constraint.type == ConstraintType.NEVER:
-                respected_constraint = torch.logical_not(respected_constraint)
-
-            unrespected_constraint: Tensor = torch.logical_not(respected_constraint)
-
-            if constraint.condition is not None:
-                respected_condition = constraint.condition.evaluate(**assignments)
-
-            apply_penalty: Tensor
-            if respected_condition.nelement() > 0:
-                if constraint.type == ConstraintType.IMPLICATION:
-                    # A -> B that is NOT(A) OR B
-                    # we want the penalty so: NOT(NOT(A) OR B) that is A AND NOT(B)
-                    apply_penalty = torch.logical_and(respected_condition, unrespected_constraint)
-
-                elif constraint.type == ConstraintType.DOUBLE_IMPLICATION:
-                    # A <-> B that is NOT(A XOR B)
-                    # we want the penalty so: NOT(NOT(A XOR B)) that is A XOR B
-                    apply_penalty = torch.logical_xor(respected_condition, respected_constraint)
-                else:
-                    raise ValueError(f"Unsupported constraint type: {constraint.type}")
+            if respected_constraint.dim() == 0:
+                return torch.tensor([0], device='mps') if respected_constraint.item() else torch.tensor([10], device='mps')
             else:
-                apply_penalty = unrespected_constraint
+                respected_condition: Tensor = torch.tensor([])
 
-            multiplier: float = 1
-            regularization_tensor[apply_penalty] += multiplier * constraint.weight
+                if constraint.type == ConstraintType.NEVER:
+                    respected_constraint = torch.logical_not(respected_constraint)
+
+                unrespected_constraint: Tensor = torch.logical_not(respected_constraint)
+
+                if constraint.condition is not None:
+                    respected_condition = constraint.condition.evaluate(**assignments)
+
+                apply_penalty: Tensor
+                if respected_condition.nelement() > 0:
+                    if constraint.type == ConstraintType.IMPLICATION:
+                        # A -> B that is NOT(A) OR B
+                        # we want the penalty so: NOT(NOT(A) OR B) that is A AND NOT(B)
+                        apply_penalty = torch.logical_and(respected_condition, unrespected_constraint)
+
+                    elif constraint.type == ConstraintType.DOUBLE_IMPLICATION:
+                        # A <-> B that is NOT(A XOR B)
+                        # we want the penalty so: NOT(NOT(A XOR B)) that is A XOR B
+                        apply_penalty = torch.logical_xor(respected_condition, respected_constraint)
+                    else:
+                        raise ValueError(f"Unsupported constraint type: {constraint.type}")
+                else:
+                    apply_penalty = unrespected_constraint
+
+                multiplier: float = 1
+                regularization_tensor[apply_penalty] += multiplier * constraint.weight
         return regularization_tensor
 
     return regularization_fn
