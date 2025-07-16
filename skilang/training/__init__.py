@@ -34,7 +34,7 @@ def start_training(
 
         if learnable.backend == Backend.PYTORCH:
             model: NeuralNetwork = create_torch_model(learnable)
-            encodings: Dict[str, EncodingType] = learnable.encodings
+            encodings: Dict[EncodingType, List[str]] = learnable.encodings
             trained_model = train_torch_model(
                 learnable.name, model, dataset, encodings, optimization, knowledge, constraints
             )
@@ -49,7 +49,7 @@ def train_torch_model(
     model_name: str,
     model: NeuralNetwork,
     dataset: Dataset,
-    encodings: Dict[str, EncodingType],
+    encodings: Dict[EncodingType, List[str]],
     optimization: Optimization,
     knowledge: List[Rule],
     constraints: List[Constraint],

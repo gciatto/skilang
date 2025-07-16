@@ -43,9 +43,11 @@ def get_learnables(spec: Dict) -> List[Learnable]:
 
         learnable_type = LearnableType(props["type"])
 
-        encodings: Dict[str, EncodingType] = {
-            feature: EncodingType(encoding) for feature, encoding in props.get("encodings", {}).items()
-        }
+        encodings: Dict[EncodingType, List[str]] = {}
+        for column, encoding in props.get("encodings", {}).items():
+            if EncodingType(encoding) not in encodings:
+                encodings[EncodingType(encoding)] = []
+            encodings[EncodingType(encoding)].append(column)
 
         backend = Backend(props.get("backend", Backend.PYTORCH.value))
 

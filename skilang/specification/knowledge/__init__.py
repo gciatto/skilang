@@ -14,7 +14,7 @@ class Rule:
 
 
 def get_knowledge(specification: dict) -> List[Rule]:
-    knowledge = specification["knowledge"]
+    knowledge = specification.get("knowledge", [])
     rules = [
         Rule(
             name=rule["rule"],

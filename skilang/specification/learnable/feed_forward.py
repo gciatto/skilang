@@ -22,7 +22,11 @@ class FeedForward(Learnable):
 
 
 def create_feed_forward(
-    name: str, dataset_name: str, backend: Backend, encodings: Dict[str, EncodingType], layers: List[Layer]
+    name: str,
+    dataset_name: str,
+    backend: Backend,
+    encodings: Dict[EncodingType, List[str]],
+    layers: List[Layer],
 ) -> FeedForward:
     return FeedForward(
         name=name,

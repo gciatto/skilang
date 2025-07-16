@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 
 from skilang.specification.learnable.enum import Backend, EncodingType
 
@@ -9,5 +9,5 @@ from skilang.specification.learnable.enum import Backend, EncodingType
 class Learnable(ABC):
     name: str
     dataset_name: str
-    encodings: Dict[str, EncodingType]
+    encodings: Dict[EncodingType, List[str]]
     backend: Backend = Backend.PYTORCH
