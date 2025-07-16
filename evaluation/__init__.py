@@ -1,4 +1,6 @@
+import numpy as np
 import torch
+from torch import Tensor
 from torchic.nn.builder import NeuralNetworkBuilder
 from torchic.utils import get_current_device
 from models import PATH as MODEL_PATH
@@ -23,7 +25,29 @@ def load_model(name: str) -> NeuralNetwork:
     return model
 
 
-def statistical_parity(predictions: torch.Tensor, protected_attribute: torch.Tensor) -> float:
+def is_close(a: Tensor, b: float, tol: float = 1e-4) -> bool:
+    """
+    Check if two floating-point numbers are close within a tolerance.
+    :param a: First number
+    :param b: Second number
+    :param tol: Tolerance
+    :return: True if numbers are close, False otherwise
+    """
+    return abs(a - b) <= tol
+
+
+def is_not_close(a: Tensor, b: float, tol: float = 1e-4) -> bool:
+    """
+    Check if two floating-point numbers are not close within a tolerance.
+    :param a: First number
+    :param b: Second number
+    :param tol: Tolerance
+    :return: True if numbers are not close, False otherwise
+    """
+    return abs(a - b) > tol
+
+
+def statistical_parity(predictions: torch.Tensor, protected_attribute: np.array) -> float:
     """
     Calculate the statistical parity difference.
     :param predictions: Model predictions (tensor of shape [N, num_classes])
@@ -31,13 +55,12 @@ def statistical_parity(predictions: torch.Tensor, protected_attribute: torch.Ten
     :return: Statistical parity difference
     """
     # Convert predictions to binary (1 for positive class, 0 for negative class)
-    unique_values = protected_attribute.unique()
+    unique_values = np.unique(protected_attribute)
     value_0 = max(unique_values)
-    predicted_classes = predictions.argmax(dim=1)
 
     # Calculate the proportion of positive predictions for each group
-    group_0_positive_rate = predicted_classes[protected_attribute == value_0].float().mean().item()
-    group_1_positive_rate = predicted_classes[protected_attribute != value_0].float().mean().item()
+    group_0_positive_rate = predictions[is_close(protected_attribute, value_0)].float().mean().item()
+    group_1_positive_rate = predictions[is_not_close(protected_attribute, value_0)].float().mean().item()
 
     # Calculate statistical parity difference
     return abs(group_0_positive_rate - group_1_positive_rate)

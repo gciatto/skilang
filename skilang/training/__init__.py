@@ -23,6 +23,7 @@ def start_training(
     learnables: List[Learnable],
     knowledge: List[Rule],
     constraints: List[Constraint],
+    seed: int = 0,
 ) -> List[NeuralNetwork]:
     """
     Start the training process.
@@ -36,7 +37,7 @@ def start_training(
             model: NeuralNetwork = create_torch_model(learnable)
             encodings: Dict[str, EncodingType] = learnable.encodings
             trained_model = train_torch_model(
-                learnable.name, model, dataset, encodings, optimization, knowledge, constraints
+                learnable.name, model, dataset, encodings, optimization, knowledge, constraints, seed
             )
             trained_models.append(trained_model)
         else:
@@ -53,7 +54,10 @@ def train_torch_model(
     optimization: Optimization,
     knowledge: List[Rule],
     constraints: List[Constraint],
+    seed: int = 0,
 ) -> NeuralNetwork:
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
     mappings: Dict[str, Dict[str, float]] = {}
     if len(encodings) != 0:
         dataset, mappings = encode_dataset(dataset, encodings)
@@ -91,7 +95,7 @@ def train_torch_model(
     epochs = optimization.epochs
     ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
 
-    model.plot_loss()
+    # model.plot_loss()
     return model
 
 

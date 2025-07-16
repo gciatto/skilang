@@ -1,5 +1,4 @@
 import fire
-import os
 from pathlib import Path
 from evaluation.results import PATH as RESULTS_PATH
 from typing import Dict, List
@@ -22,7 +21,10 @@ def parse_specification(file: Path) -> Dict:
     return yaml.load(open(file), Loader=yaml.FullLoader)
 
 
-def main(spec_file: str, protected_idx: int = 8):
+def main(spec_file: str, protected_idx: int = 8, population: int = 5):
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import accuracy_score, f1_score
+
     spec_file_path: Path = PROJECT_ROOT / spec_file
     if not spec_file_path.is_file():
         raise FileNotFoundError(f"File not found: {spec_file_path}")
@@ -34,44 +36,86 @@ def main(spec_file: str, protected_idx: int = 8):
     optimization: Optimization = get_optimization(specification)
     learnables: List[Learnable] = get_learnables(specification)
 
+    subfolders = ["educated", "uneducated"]
+    colors = {"educated": "blue", "uneducated": "orange"}
+
+    metrics = {
+        "Statistical Parity": {"educated": [], "uneducated": []},
+        "Accuracy": {"educated": [], "uneducated": []},
+        "F1 Score": {"educated": [], "uneducated": []}
+    }
+
     for learnable in learnables:
-        dataset: Dataset = next(dataset for dataset in datasets if dataset.name == learnables[0].dataset_name)
-        encodings: Dict[str, EncodingType] = learnable.encodings
-        trained_model = load_model(learnable.name)
+        for subfolder in subfolders:
+            dataset: Dataset = next(dataset for dataset in datasets if dataset.name == learnable.dataset_name)
+            encodings: Dict[str, EncodingType] = learnable.encodings
 
-        if len(encodings) != 0:
-            dataset, _ = encode_dataset(dataset, encodings)
+            if len(encodings) != 0:
+                dataset, _ = encode_dataset(dataset, encodings)
 
-        test_loader: DataLoader = create_torch_dataloader(dataset.test, optimization.batch_size)
+            test_loader: DataLoader = create_torch_dataloader(dataset.test, optimization.batch_size)
 
-        # collect the predictions of the model on the test set
-        predictions = []
-        with torch.no_grad():
-            for batch in test_loader:
-                inputs, targets = batch
-                inputs = inputs.to(trained_model.device())
-                outputs = trained_model(inputs)
-                predictions.append(outputs)
-        # Reshape predictions to a single tensor
-        predictions = torch.cat(predictions, dim=0)
+            sp_values = []
+            accuracy_values = []
+            f1_values = []
 
-        # Save the predictions to a file
-        # THe file must be a csv with 3 columns:
-        # - value of the protected attribute
-        # - predicted class
-        # - true class
-        dest_path = RESULTS_PATH / f"{learnable.name}_predictions.csv"
-        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-        with open(dest_path, 'w') as f:
-            f.write("protected_attribute,predicted_class,true_class\n")
-            for i, (pred, target) in enumerate(zip(predictions, dataset.test["income"])):
-                protected_value = dataset.test.iloc[i, protected_idx].item()
-                predicted_class = pred.argmax()
-                f.write(f"{protected_value},{predicted_class},{target}\n")
+            for i in range(population):
+                model_name = f"{subfolder}/{learnable.name}_seed_{i}"
+                trained_model = load_model(model_name)
 
-        # Print statistical parity
-        statistical_parity_diff = statistical_parity(predictions, dataset.test.iloc[:, protected_idx])
-        print(f"Statistical parity difference for {learnable.name}: {statistical_parity_diff:.4f}")
+                predictions = []
+                true_classes = []
+                with torch.no_grad():
+                    for batch in test_loader:
+                        inputs, targets = batch
+                        inputs = inputs.to(trained_model.device())
+                        outputs = trained_model(inputs)
+                        outputs1 = trained_model(inputs)
+                        outputs2 = trained_model(inputs)
+                        predictions.append(outputs)
+                        true_classes.append(targets)
+
+                predictions = torch.cat(predictions, dim=0)
+                true_classes = torch.cat(true_classes, dim=0)
+
+                protected_values = dataset.test.iloc[:, protected_idx].values
+
+                predicted_classes = predictions.argmax(dim=1)
+
+                sp_values.append(statistical_parity(predicted_classes.cpu(), protected_values))
+                accuracy_values.append(accuracy_score(true_classes.cpu(), predicted_classes.cpu()))
+                f1_values.append(f1_score(true_classes.cpu(), predicted_classes.cpu(), average="weighted"))
+
+            metrics["Statistical Parity"][subfolder].extend(sp_values)
+            metrics["Accuracy"][subfolder].extend(accuracy_values)
+            metrics["F1 Score"][subfolder].extend(f1_values)
+
+    plt.figure(figsize=(12, 8))
+    for i, (metric_name, group_values) in enumerate(metrics.items()):
+        plt.subplot(1, 3, i + 1)
+
+        educated_data = group_values["educated"]
+        uneducated_data = group_values["uneducated"]
+
+        boxplot = plt.boxplot(
+            [educated_data, uneducated_data],
+            patch_artist=True,
+            boxprops=dict(color="black"),
+            medianprops=dict(color='black')
+        )
+
+        colors_list = [colors["educated"], colors["uneducated"]]
+        for patch, color in zip(boxplot['boxes'], colors_list):
+            patch.set_facecolor(color)
+
+        plt.xticks([1, 2], ['Educated', 'Uneducated'])
+        plt.title(metric_name)
+
+    plt.suptitle("Metrics Comparison Between Educated and Uneducated")
+    plot_path = RESULTS_PATH / "metrics_comparison_boxplot"
+    plt.savefig(str(plot_path) + ".png")
+    plt.savefig(str(plot_path) + ".pdf")
+    plt.close()
 
 
 if __name__ == "__main__":

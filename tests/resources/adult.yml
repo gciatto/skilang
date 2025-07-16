@@ -94,5 +94,5 @@ knowledge:
 constraints:
   - always: over50k(person) == income
     weight: 1
-  - always: SP(person[race], over50k(person)) <= 0.1
+  - always: SP(person[race], over50k(person)) <= 0.005
     weight: 10
