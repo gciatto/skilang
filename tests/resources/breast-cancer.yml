@@ -1,0 +1,98 @@
+data:
+  breast-cancer:
+    dataset:
+      uri: https://archive.ics.uci.edu/static/public/15/breast+cancer+wisconsin+original.zip
+      unpack: datasets/breast-cancer
+      file_name: breast-cancer-wisconsin.data
+      type: csv(',')
+      split:
+        train: 0.8
+        test: 0.2
+
+    preprocess:
+      - remove: [id]
+      - replace:
+          column: bare_nuclei
+          value: '?'
+          with: 0
+
+    instance_name: patient
+    features:
+      - name: id
+        type: int
+      - name: clump_thickness
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: uniformity_of_cell_size
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: uniformity_of_cell_shape
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: marginal_adhesion
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: single_epithelial_cell_size
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: bare_nuclei
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: bland_chromatin
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: normal_nucleoli
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      - name: mitoses
+        values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    targets:
+      - name: Class
+        values:
+          benign: 2
+          malignant: 4
+
+optimization:
+  epochs: 20
+  optimizer: adam
+  learning_rate: 0.001
+  loss: cross_entropy
+  metrics: [accuracy]
+  batch_size: 64
+
+learnable:
+  CancerDetection:
+    destination: ../../models
+    dataset: breast-cancer
+    encodings:
+      features.clump_thickness: ordinal
+      features.uniformity_of_cell_size: ordinal
+      features.uniformity_of_cell_shape: ordinal
+      features.marginal_adhesion: ordinal
+      features.single_epithelial_cell_size: ordinal
+      features.bare_nuclei: ordinal
+      features.bland_chromatin: ordinal
+      features.normal_nucleoli: ordinal
+      features.mitoses: ordinal
+      targets.Class: ordinal
+    inputs:
+      - breast-cancer.features
+    outputs:
+      - source: features.income
+        transform: ordinal
+    type: neural_network # TODO: inconsistent with code
+    layers:
+      - linear:
+          input: 9
+          output: 64
+          activation: relu
+      - linear:
+          input: 64
+          output: 64
+          activation: relu
+      - linear:
+          input: 64
+          output: 2
+          activation: softmax
+
+#knowledge:
+#  - rule: SP
+#    args: [sensitive, target]
+#    clause: abs(abs(mean(target[sensitive == White])) - abs(mean(target[sensitive != White])))
+
+#constraints:
+#  - always: CancerDetection(patient) == Class
+#    weight: 1
