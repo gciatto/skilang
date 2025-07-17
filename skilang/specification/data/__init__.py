@@ -198,10 +198,11 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
             preprocessed_raw_targets = [
                 raw_target for raw_target in raw_targets if raw_target["name"] in training.columns
             ]
-            features: List[Feature] = create_features(preprocessed_raw_features)
-            targets: List[Target] = create_targets(
-                preprocessed_raw_targets, starting_column=len(preprocessed_raw_features)
-            )
+            raw_features = preprocessed_raw_features
+            raw_targets = preprocessed_raw_targets
+
+        features: List[Feature] = create_features(raw_features)
+        targets: List[Target] = create_targets(raw_targets, starting_column=len(raw_features))
 
         # Convert categorical columns to strings
         for column in features + targets:

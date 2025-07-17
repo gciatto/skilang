@@ -72,6 +72,18 @@ learnable:
   InjectedPokerHand:
     destination: ../../models
     dataset: PokerHand
+    encodings:
+      features.suit1: ordinal
+      features.rank1: ordinal
+      features.suit2: ordinal
+      features.rank2: ordinal
+      features.suit3: ordinal
+      features.rank3: ordinal
+      features.suit4: ordinal
+      features.rank4: ordinal
+      features.suit5: ordinal
+      features.rank5: ordinal
+      targets.Class: ordinal
     inputs:
       - PokerHand.features
     outputs:

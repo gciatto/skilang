@@ -61,7 +61,7 @@ learnable:
       features.relationship: ordinal
       features.race: ordinal
       features.sex: ordinal
-      features.native_country: ordinal
+      features.native-country: ordinal
       targets.income: ordinal
     inputs:
       - adult.features

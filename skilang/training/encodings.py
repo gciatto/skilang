@@ -2,7 +2,7 @@ from copy import deepcopy
 from typing import Dict, Tuple, List
 
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder, StandardScaler, LabelEncoder
+from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
 
 from skilang.specification.data import Dataset
 from skilang.specification.learnable import EncodingType
@@ -36,7 +36,7 @@ def ordinal_encoding(
     columns: List[str],
 ) -> Tuple["Dataset", Dict[str, Dict[str, float]]]:
     encoder = OrdinalEncoder()
-    scaler = StandardScaler()
+    # scaler = StandardScaler()
     label_encoder = LabelEncoder()
 
     features: List[str] = [column.split(".")[-1] for column in columns if column.startswith("features.")]
@@ -54,10 +54,10 @@ def ordinal_encoding(
         # Apply standard scaling only to selected features
         if index == 0:
             X_encoded[features] = encoder.fit_transform(X_raw[features])
-            X_encoded[features] = scaler.fit_transform(X_encoded[features])
+            # X_encoded[features] = scaler.fit_transform(X_encoded[features])
         else:
             X_encoded[features] = encoder.transform(X_raw[features])
-            X_encoded[features] = scaler.transform(X_encoded[features])
+            # X_encoded[features] = scaler.transform(X_encoded[features])
 
         # Build DataFrame with scaled values and retain original unprocessed features
         X_final = X_raw.copy()
@@ -72,8 +72,9 @@ def ordinal_encoding(
                 temp_row = X_encoded[features].iloc[0:1].copy()
                 temp_row.loc[:, :] = 0
                 temp_row[col] = j
-                scaled_value = scaler.transform(temp_row)[0][features.index(col)]
-                mapping[cat] = scaled_value
+                # scaled_value = scaler.transform(temp_row)[0][features.index(col)]
+                # mapping[cat] = scaled_value
+                mapping[cat] = features.index(col)
 
             features_mappings[col] = mapping
 

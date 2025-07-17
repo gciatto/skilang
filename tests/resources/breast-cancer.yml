@@ -46,7 +46,7 @@ data:
           malignant: 4
 
 optimization:
-  epochs: 10
+  epochs: 20
   optimizer: adam
   learning_rate: 0.001
   loss: cross_entropy
