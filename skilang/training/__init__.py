@@ -114,6 +114,7 @@ def create_regularization_fn(
         }
 
         regularization_tensor: Tensor = torch.zeros(input_batch.shape[0]).to(input_batch.device)
+        regularization_scalar: Tensor = torch.tensor(0.0).to(input_batch.device)
 
         def create_model_output_fn(pred_snapshot):
             return lambda batch_snapshot: pred_snapshot.argmax(dim=1)
@@ -131,8 +132,14 @@ def create_regularization_fn(
 
         for index, constraint in enumerate(constraints):
             respected_constraint = constraint.clause.evaluate(**assignments)
+
             if respected_constraint.dim() == 0:
-                return torch.tensor([0], device='mps') if respected_constraint.item() else torch.tensor([10], device='mps')
+                regularization_scalar += constraint.weight * respected_constraint
+
+            elif respected_constraint.dim() == 1:
+                d = respected_constraint.shape[0]
+                regularization_scalar += constraint.weight * (d - respected_constraint.sum()) / d
+
             else:
                 respected_condition: Tensor = torch.tensor([])
 
@@ -162,6 +169,7 @@ def create_regularization_fn(
 
                 multiplier: float = 1
                 regularization_tensor[apply_penalty] += multiplier * constraint.weight
-        return regularization_tensor
+
+        return regularization_tensor if torch.zeros_like(regularization_scalar) else regularization_scalar
 
     return regularization_fn
