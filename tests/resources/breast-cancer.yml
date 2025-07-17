@@ -46,12 +46,12 @@ data:
           malignant: 4
 
 optimization:
-  epochs: 20
+  epochs: 10
   optimizer: adam
   learning_rate: 0.001
   loss: cross_entropy
   metrics: [accuracy]
-  batch_size: 64
+  batch_size: 8
 
 learnable:
   CancerDetection:
@@ -88,11 +88,24 @@ learnable:
           output: 2
           activation: softmax
 
-#knowledge:
-#  - rule: SP
-#    args: [sensitive, target]
-#    clause: abs(abs(mean(target[sensitive == White])) - abs(mean(target[sensitive != White])))
+knowledge:
+  - rule: high_risk
+    args: [patient, target]
+    clause: |
+      patient[clump_thickness] >= 7 &
+      patient[uniformity_of_cell_size] >= 7 &
+      patient[uniformity_of_cell_shape] >= 7 &
+      patient[marginal_adhesion] >= 7 &
+      patient[single_epithelial_cell_size] >= 7 &
+      patient[bare_nuclei] >= 7 &
+      patient[bland_chromatin] >= 7 &
+      patient[normal_nucleoli] >= 7 &
+      patient[mitoses] >= 7
 
 #constraints:
 #  - always: CancerDetection(patient) == Class
 #    weight: 1
+#
+#  - if: high_risk(patient, Class)
+#    then: CancerDetection(patient) == malignant
+#    weight: 10

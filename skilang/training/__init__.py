@@ -126,6 +126,7 @@ def create_regularization_fn(
 
         for index, constraint in enumerate(constraints):
             respected_constraint = constraint.clause.evaluate(**assignments)
+
             respected_condition: Tensor = torch.tensor([])
 
             if constraint.type == ConstraintType.NEVER:

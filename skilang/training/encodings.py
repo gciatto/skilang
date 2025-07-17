@@ -93,5 +93,6 @@ def ordinal_encoding(
     encoded_dataset: Dataset = deepcopy(dataset)
     encoded_dataset.training = encoded_datasets[0]
     encoded_dataset.test = encoded_datasets[1]
-
+    # TODO: 2 problemi: valori classe 2 e 4 sostituiscono colonne,
+    #  e i dieci valori da 1 a 10 sono diversi per ogni feature (quindi tiene l'ultimo)
     return encoded_dataset, final_mappings

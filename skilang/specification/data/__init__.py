@@ -156,10 +156,8 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
     datasets_spec: Dict = specification["data"]
     datasets: List[Dataset] = []
     for dataset_name, current_dataset in datasets_spec.items():
-        features: List[Feature] = create_features(current_dataset["features"])
-        targets: List[Target] = create_targets(
-            current_dataset.get("targets", []), starting_column=len(features)
-        )
+        raw_features: List = current_dataset["features"]
+        raw_targets: List = current_dataset["targets"]
 
         test_percentage: Optional[float] = None
         if "training" in current_dataset:
@@ -183,17 +181,27 @@ def get_datasets(specification: Dict, spec_file_path: Path) -> List[Dataset]:
             training = pd.read_csv(spec_file_path / training_dataset["file"], sep=separator)
             test = pd.read_csv(spec_file_path / test_dataset["file"], sep=separator)
 
-        columns: List[str] = [feature.name for feature in features]
-        columns += [target.name for target in targets]
+        columns: List[str] = [feature["name"] for feature in raw_features]
+        columns += [target["name"] for target in raw_targets]
 
         training.columns = columns
         test.columns = columns
 
         if test_percentage is not None:
-            training, test = split_dataset(training, targets[0].name, test_percentage)
+            training, test = split_dataset(training, raw_targets[0]["name"], test_percentage)
 
         if "preprocess" in current_dataset:
             preprocess_dataset(current_dataset["preprocess"], training, test)
+            preprocessed_raw_features = [
+                raw_feature for raw_feature in raw_features if raw_feature["name"] in training.columns
+            ]
+            preprocessed_raw_targets = [
+                raw_target for raw_target in raw_targets if raw_target["name"] in training.columns
+            ]
+            features: List[Feature] = create_features(preprocessed_raw_features)
+            targets: List[Target] = create_targets(
+                preprocessed_raw_targets, starting_column=len(preprocessed_raw_features)
+            )
 
         # Convert categorical columns to strings
         for column in features + targets:
