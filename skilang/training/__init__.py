@@ -116,8 +116,12 @@ def create_regularization_fn(
         regularization_tensor: Tensor = torch.zeros(input_batch.shape[0]).to(input_batch.device)
         regularization_scalar: Tensor = torch.tensor(0.0).to(input_batch.device)
 
+        def straight_through(x, tau=0.5):
+            return (x > tau).float() + (x - x.detach())
+
         def create_model_output_fn(pred_snapshot):
-            return lambda batch_snapshot: pred_snapshot.argmax(dim=1)
+            # return lambda batch_snapshot: pred_snapshot.argmax(dim=1)
+            return lambda batch_snapshot: straight_through(pred_snapshot.softmax(dim=1)[:, 1])
 
         # Add the model output to the assignments
         batch_assignments.update({model_name: create_model_output_fn(pred)})
@@ -170,6 +174,15 @@ def create_regularization_fn(
                 multiplier: float = 1
                 regularization_tensor[apply_penalty] += multiplier * constraint.weight
 
-        return regularization_tensor if torch.zeros_like(regularization_scalar) else regularization_scalar
+        if torch.zeros_like(regularization_scalar):
+            #print("regularization_tensor.requires_grad =", regularization_tensor.requires_grad)
+            #print("regularization_tensor.grad_fn =", regularization_tensor.grad_fn)
+            #print("regularization_tensor is leaf =", regularization_tensor.is_leaf)
+            return regularization_tensor
+        else:
+            #print("regularization_scalar.requires_grad =", regularization_scalar.requires_grad)
+            #print("regularization_scalar.grad_fn =", regularization_scalar.grad_fn)
+            #print("regularization_scalar is leaf =", regularization_scalar.is_leaf)
+            return regularization_scalar
 
     return regularization_fn

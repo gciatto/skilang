@@ -1,3 +1,5 @@
+import os
+
 import fire
 from pathlib import Path
 
@@ -24,7 +26,7 @@ def parse_specification(file: Path) -> Dict:
     return yaml.load(open(file), Loader=yaml.FullLoader)
 
 
-def main(spec_file: str, protected_idx: int = 8, population: int = 5):
+def main(spec_file: str, protected_idx: int = 8, population: int = 30):
     import matplotlib.pyplot as plt
     from sklearn.metrics import accuracy_score, f1_score
 
@@ -49,6 +51,7 @@ def main(spec_file: str, protected_idx: int = 8, population: int = 5):
     }
 
     for learnable in learnables:
+        main_subfolder = learnable.name
         for subfolder in subfolders:
             dataset: Dataset = next(dataset for dataset in datasets if dataset.name == learnable.dataset_name)
             encodings: Dict[str, EncodingType] = learnable.encodings
@@ -63,7 +66,7 @@ def main(spec_file: str, protected_idx: int = 8, population: int = 5):
             f1_values = []
 
             for i in range(population):
-                model_name = f"{subfolder}/{learnable.name}_seed_{i}"
+                model_name = f"{main_subfolder}{os.sep}{subfolder}{os.sep}{learnable.name}_seed_{i}"
                 trained_model = load_model(model_name)
 
                 predictions = []
@@ -91,32 +94,32 @@ def main(spec_file: str, protected_idx: int = 8, population: int = 5):
             metrics["Accuracy"][subfolder].extend(accuracy_values)
             metrics["F1 Score"][subfolder].extend(f1_values)
 
-    plt.figure(figsize=(12, 8))
-    for i, (metric_name, group_values) in enumerate(metrics.items()):
-        plt.subplot(1, 3, i + 1)
+        plt.figure(figsize=(12, 8))
+        for i, (metric_name, group_values) in enumerate(metrics.items()):
+            plt.subplot(1, 3, i + 1)
 
-        educated_data = group_values["educated"]
-        uneducated_data = group_values["uneducated"]
+            educated_data = group_values["educated"]
+            uneducated_data = group_values["uneducated"]
 
-        boxplot = plt.boxplot(
-            [educated_data, uneducated_data],
-            patch_artist=True,
-            boxprops=dict(color="black"),
-            medianprops=dict(color='black')
-        )
+            boxplot = plt.boxplot(
+                [educated_data, uneducated_data],
+                patch_artist=True,
+                boxprops=dict(color="black"),
+                medianprops=dict(color='black')
+            )
 
-        colors_list = [colors["educated"], colors["uneducated"]]
-        for patch, color in zip(boxplot['boxes'], colors_list):
-            patch.set_facecolor(color)
+            colors_list = [colors["educated"], colors["uneducated"]]
+            for patch, color in zip(boxplot['boxes'], colors_list):
+                patch.set_facecolor(color)
 
-        plt.xticks([1, 2], ['Educated', 'Uneducated'])
-        plt.title(metric_name)
+            plt.xticks([1, 2], ['Educated', 'Uneducated'])
+            plt.title(metric_name)
 
-    plt.suptitle("Metrics Comparison Between Educated and Uneducated")
-    plot_path = RESULTS_PATH / "metrics_comparison_boxplot"
-    plt.savefig(str(plot_path) + ".png")
-    plt.savefig(str(plot_path) + ".pdf")
-    plt.close()
+        plt.suptitle("Metrics Comparison Between Educated and Uneducated")
+        plot_path = RESULTS_PATH / f"metrics_comparison_boxplot_{main_subfolder}"
+        plt.savefig(str(plot_path) + ".png")
+        plt.savefig(str(plot_path) + ".pdf")
+        plt.close()
 
 
 if __name__ == "__main__":

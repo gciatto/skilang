@@ -91,8 +91,8 @@ knowledge:
     args: [sensitive, target]
     clause: abs(mean(target[sensitive == White]) - mean(target[sensitive != White]))
 
-constraints:
-  - always: over50k(person) == income
-    weight: 1
-  - always: SP(person[race], over50k(person)) <= 0.01
-    weight: 10
+#constraints:
+#  - always: over50k(person) == income
+#    weight: 1
+#  - always: SP(person[race], over50k(person))
+#    weight: 1
