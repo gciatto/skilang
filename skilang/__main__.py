@@ -1,4 +1,3 @@
-import argparse
 import os
 from pathlib import Path
 from typing import Dict, List
@@ -20,7 +19,7 @@ def parse_specification(file: Path) -> Dict:
 
 
 def main(spec_file: Path, population: int = 30, seed: int = 0):
-    spec_file: Path = Path(spec_file).resolve()
+    spec_file = Path(spec_file).resolve()
     if not spec_file.is_file():
         raise FileNotFoundError(f"File not found: {spec_file}")
 

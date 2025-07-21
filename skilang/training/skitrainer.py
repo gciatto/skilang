@@ -8,13 +8,13 @@ from torchic.nn.trainers import AbstractTrainer
 
 class SkiTrainer(AbstractTrainer):
     def __init__(
-            self, model: NeuralNetwork, regularization_fn: Callable[[Tensor, Tensor, Tensor], Tensor]
+        self, model: NeuralNetwork, regularization_fn: Callable[[Tensor, Tensor, Tensor], Tensor]
     ) -> None:
         super().__init__(model)
         self.regularization_fn: Callable[[Tensor, Tensor, Tensor], Tensor] = regularization_fn
 
     def train_step(
-            self, input_batch: Tensor, target: Tensor, loss_fn: Callable
+        self, input_batch: Tensor, target: Tensor, loss_fn: Callable
     ) -> Tuple[Tensor, torch.types.Number]:
         # Compute prediction error
         pred: Tensor = self.model(input_batch)
@@ -34,7 +34,7 @@ class SkiTrainer(AbstractTrainer):
         return pred, modified_loss.item()
 
     def eval_step(
-            self, input_batch: Tensor, target: Tensor, loss_fn: Callable
+        self, input_batch: Tensor, target: Tensor, loss_fn: Callable
     ) -> Tuple[Tensor, torch.types.Number]:
         pred: Tensor = self.model(input_batch)
         loss: Tensor = loss_fn(pred, target)

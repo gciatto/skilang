@@ -1,10 +1,10 @@
-import numpy as np
 import torch
 from torch import Tensor
+from torchic.nn import NeuralNetwork
 from torchic.nn.builder import NeuralNetworkBuilder
 from torchic.utils import get_current_device
+
 from models import PATH as MODEL_PATH
-from torchic.nn import NeuralNetwork
 
 
 def load_model(name: str) -> NeuralNetwork:
@@ -12,14 +12,15 @@ def load_model(name: str) -> NeuralNetwork:
     if not model_path.is_file():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
-    model = (NeuralNetworkBuilder(get_current_device())
-             .add_linear(14,64)
-             .add_layer(torch.nn.ReLU())
-             .add_linear(64, 64)
-             .add_layer(torch.nn.ReLU())
-             .add_linear(64, 2)
-             .add_layer(torch.nn.Softmax())
-             ).build()
+    model = (
+        NeuralNetworkBuilder(get_current_device())
+        .add_linear(14, 64)
+        .add_layer(torch.nn.ReLU())
+        .add_linear(64, 64)
+        .add_layer(torch.nn.ReLU())
+        .add_linear(64, 2)
+        .add_layer(torch.nn.Softmax())
+    ).build()
     model.load(model_path)
 
     return model

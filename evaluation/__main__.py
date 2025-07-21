@@ -1,22 +1,19 @@
 import os
+from pathlib import Path
+from typing import Dict, List
 
 import fire
-from pathlib import Path
-
-import numpy as np
-
-from evaluation.results import PATH as RESULTS_PATH
-from typing import Dict, List
 import torch
 import yaml
 from torch.utils.data import DataLoader
+
 from evaluation import load_model, statistical_parity
+from evaluation.results import PATH as RESULTS_PATH
 from skilang.specification.data import Dataset, get_datasets
 from skilang.specification.learnable import get_learnables, Learnable, EncodingType
 from skilang.specification.learnable.impl import create_torch_dataloader
 from skilang.specification.optimization import Optimization, get_optimization
 from skilang.training import encode_dataset
-
 
 CURRENT_DIR = Path(__file__).parent
 PROJECT_ROOT = CURRENT_DIR.parent
@@ -47,7 +44,7 @@ def main(spec_file: str, protected_idx: int = 8, population: int = 30):
     metrics = {
         "Statistical Parity": {"educated": [], "uneducated": []},
         "Accuracy": {"educated": [], "uneducated": []},
-        "F1 Score": {"educated": [], "uneducated": []}
+        "F1 Score": {"educated": [], "uneducated": []},
     }
 
     for learnable in learnables:
@@ -105,14 +102,14 @@ def main(spec_file: str, protected_idx: int = 8, population: int = 30):
                 [educated_data, uneducated_data],
                 patch_artist=True,
                 boxprops=dict(color="black"),
-                medianprops=dict(color='black')
+                medianprops=dict(color="black"),
             )
 
             colors_list = [colors["educated"], colors["uneducated"]]
-            for patch, color in zip(boxplot['boxes'], colors_list):
+            for patch, color in zip(boxplot["boxes"], colors_list):
                 patch.set_facecolor(color)
 
-            plt.xticks([1, 2], ['Educated', 'Uneducated'])
+            plt.xticks([1, 2], ["Educated", "Uneducated"])
             plt.title(metric_name)
 
         plt.suptitle("Metrics Comparison Between Educated and Uneducated")

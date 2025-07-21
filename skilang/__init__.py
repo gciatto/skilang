@@ -5,6 +5,7 @@ from torch import Tensor
 from skilang.builtins import skilang_builtins_dict
 from skilang.preprocessing import preprocessing
 from skilang.utils import logger
+import warnings
 
 
 class EvaluationError(Exception):
@@ -41,7 +42,13 @@ class Formula:
     def evaluate(self, **kwargs):
         try:
             kwargs.update(skilang_builtins_dict())
-            return self._evaluate(**kwargs)
+            result = self._evaluate(**kwargs)
+            if isinstance(result, Tensor) and not result.requires_grad:
+                warnings.warn(
+                    f"Evaluating Formula {self} resulted in a Tensor without requires_grad=True.",
+                    stacklevel=2,
+                )
+            return result
         except EvaluationError:
             raise
         except Exception as e:

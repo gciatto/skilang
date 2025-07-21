@@ -175,14 +175,14 @@ def create_regularization_fn(
                 regularization_tensor[apply_penalty] += multiplier * constraint.weight
 
         if torch.zeros_like(regularization_scalar):
-            #print("regularization_tensor.requires_grad =", regularization_tensor.requires_grad)
-            #print("regularization_tensor.grad_fn =", regularization_tensor.grad_fn)
-            #print("regularization_tensor is leaf =", regularization_tensor.is_leaf)
+            # print("regularization_tensor.requires_grad =", regularization_tensor.requires_grad)
+            # print("regularization_tensor.grad_fn =", regularization_tensor.grad_fn)
+            # print("regularization_tensor is leaf =", regularization_tensor.is_leaf)
             return regularization_tensor
         else:
-            #print("regularization_scalar.requires_grad =", regularization_scalar.requires_grad)
-            #print("regularization_scalar.grad_fn =", regularization_scalar.grad_fn)
-            #print("regularization_scalar is leaf =", regularization_scalar.is_leaf)
+            # print("regularization_scalar.requires_grad =", regularization_scalar.requires_grad)
+            # print("regularization_scalar.grad_fn =", regularization_scalar.grad_fn)
+            # print("regularization_scalar is leaf =", regularization_scalar.is_leaf)
             return regularization_scalar
 
     return regularization_fn
