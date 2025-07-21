@@ -36,7 +36,7 @@ def main(spec_file: Path, population: int = 30, seed: int = 0):
 
     for i in range(population):
         current_seed = seed + i
-        print(f"Training iteration {i + 1}/{population} with seed {seed}")
+        print(f"Training iteration {i + 1}/{population} with seed {current_seed}")
         trained_models: List[NeuralNetwork] = start_training(
             datasets, optimization, learnables, knowledge, constraints, seed=current_seed
         )
