@@ -84,7 +84,9 @@ def ordinal_encoding(
             y_encoded_array = label_encoder.fit_transform(y_raw)
             y_encoded_series = pd.Series(y_encoded_array, name=y_raw.name, index=y_raw.index)
 
-            target_mapping = {y_raw.name: dict(zip(label_encoder.classes_, range(len(label_encoder.classes_))))}
+            target_mapping = {
+                y_raw.name: dict(zip(label_encoder.classes_, range(len(label_encoder.classes_))))
+            }
 
             encoded_datasets[index] = pd.concat([X_scaled_df, y_encoded_series], axis=1)
 

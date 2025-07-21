@@ -69,4 +69,4 @@ def create_torch_dataloader(dataset: pd.DataFrame, batch_size: int) -> DataLoade
     y = torch.tensor(y, dtype=torch.float32)
 
     tensor_dataset = TensorDataset(X, y)
-    return DataLoader(tensor_dataset, batch_size=batch_size, shuffle=True)
+    return DataLoader(tensor_dataset, batch_size=batch_size, shuffle=False)

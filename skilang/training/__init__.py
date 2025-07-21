@@ -23,6 +23,7 @@ def start_training(
     learnables: List[Learnable],
     knowledge: List[Rule],
     constraints: List[Constraint],
+    seed: int = 0,
 ) -> List[NeuralNetwork]:
     """
     Start the training process.
@@ -36,7 +37,7 @@ def start_training(
             model: NeuralNetwork = create_torch_model(learnable)
             encodings: Dict[EncodingType, List[str]] = learnable.encodings
             trained_model = train_torch_model(
-                learnable.name, model, dataset, encodings, optimization, knowledge, constraints
+                learnable.name, model, dataset, encodings, optimization, knowledge, constraints, seed
             )
             trained_models.append(trained_model)
         else:
@@ -53,7 +54,10 @@ def train_torch_model(
     optimization: Optimization,
     knowledge: List[Rule],
     constraints: List[Constraint],
+    seed: int = 0,
 ) -> NeuralNetwork:
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
     mappings: Dict[str, Dict[str, float]] = {}
     if len(encodings) != 0:
         dataset, mappings = encode_dataset(dataset, encodings)
@@ -90,7 +94,8 @@ def train_torch_model(
     optimizer = get_torch_optimizer(optimization.optimizer, model.parameters(), optimization.learning_rate)
     epochs = optimization.epochs
     ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
-    model.plot_loss()
+
+    # model.plot_loss()
     return model
 
 
@@ -109,9 +114,14 @@ def create_regularization_fn(
         }
 
         regularization_tensor: Tensor = torch.zeros(input_batch.shape[0]).to(input_batch.device)
+        regularization_scalar: Tensor = torch.tensor(0.0).to(input_batch.device)
+
+        def straight_through(x, tau=0.5):
+            return (x > tau).float() + (x - x.detach())
 
         def create_model_output_fn(pred_snapshot):
-            return lambda batch_snapshot: pred_snapshot.argmax(dim=1)
+            # return lambda batch_snapshot: pred_snapshot.argmax(dim=1)
+            return lambda batch_snapshot: straight_through(pred_snapshot.softmax(dim=1)[:, 1])
 
         # Add the model output to the assignments
         batch_assignments.update({model_name: create_model_output_fn(pred)})
@@ -127,34 +137,52 @@ def create_regularization_fn(
         for index, constraint in enumerate(constraints):
             respected_constraint = constraint.clause.evaluate(**assignments)
 
-            respected_condition: Tensor = torch.tensor([])
+            if respected_constraint.dim() == 0:
+                regularization_scalar += constraint.weight * respected_constraint
 
-            if constraint.type == ConstraintType.NEVER:
-                respected_constraint = torch.logical_not(respected_constraint)
+            elif respected_constraint.dim() == 1:
+                d = respected_constraint.shape[0]
+                regularization_scalar += constraint.weight * (d - respected_constraint.sum()) / d
 
-            unrespected_constraint: Tensor = torch.logical_not(respected_constraint)
-
-            if constraint.condition is not None:
-                respected_condition = constraint.condition.evaluate(**assignments)
-
-            apply_penalty: Tensor
-            if respected_condition.nelement() > 0:
-                if constraint.type == ConstraintType.IMPLICATION:
-                    # A -> B that is NOT(A) OR B
-                    # we want the penalty so: NOT(NOT(A) OR B) that is A AND NOT(B)
-                    apply_penalty = torch.logical_and(respected_condition, unrespected_constraint)
-
-                elif constraint.type == ConstraintType.DOUBLE_IMPLICATION:
-                    # A <-> B that is NOT(A XOR B)
-                    # we want the penalty so: NOT(NOT(A XOR B)) that is A XOR B
-                    apply_penalty = torch.logical_xor(respected_condition, respected_constraint)
-                else:
-                    raise ValueError(f"Unsupported constraint type: {constraint.type}")
             else:
-                apply_penalty = unrespected_constraint
+                respected_condition: Tensor = torch.tensor([])
 
-            multiplier: float = 1
-            regularization_tensor[apply_penalty] += multiplier * constraint.weight
-        return regularization_tensor
+                if constraint.type == ConstraintType.NEVER:
+                    respected_constraint = torch.logical_not(respected_constraint)
+
+                unrespected_constraint: Tensor = torch.logical_not(respected_constraint)
+
+                if constraint.condition is not None:
+                    respected_condition = constraint.condition.evaluate(**assignments)
+
+                apply_penalty: Tensor
+                if respected_condition.nelement() > 0:
+                    if constraint.type == ConstraintType.IMPLICATION:
+                        # A -> B that is NOT(A) OR B
+                        # we want the penalty so: NOT(NOT(A) OR B) that is A AND NOT(B)
+                        apply_penalty = torch.logical_and(respected_condition, unrespected_constraint)
+
+                    elif constraint.type == ConstraintType.DOUBLE_IMPLICATION:
+                        # A <-> B that is NOT(A XOR B)
+                        # we want the penalty so: NOT(NOT(A XOR B)) that is A XOR B
+                        apply_penalty = torch.logical_xor(respected_condition, respected_constraint)
+                    else:
+                        raise ValueError(f"Unsupported constraint type: {constraint.type}")
+                else:
+                    apply_penalty = unrespected_constraint
+
+                multiplier: float = 1
+                regularization_tensor[apply_penalty] += multiplier * constraint.weight
+
+        if torch.zeros_like(regularization_scalar):
+            # print("regularization_tensor.requires_grad =", regularization_tensor.requires_grad)
+            # print("regularization_tensor.grad_fn =", regularization_tensor.grad_fn)
+            # print("regularization_tensor is leaf =", regularization_tensor.is_leaf)
+            return regularization_tensor
+        else:
+            # print("regularization_scalar.requires_grad =", regularization_scalar.requires_grad)
+            # print("regularization_scalar.grad_fn =", regularization_scalar.grad_fn)
+            # print("regularization_scalar is leaf =", regularization_scalar.is_leaf)
+            return regularization_scalar
 
     return regularization_fn

@@ -16,6 +16,7 @@ pandas = "^2.2.2"
 torch = "^2.6.0"
 pytorchic = "^4.0.2"
 openml = "^0.15.1"
+fire = "^0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.0"

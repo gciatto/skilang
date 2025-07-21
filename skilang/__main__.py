@@ -1,8 +1,8 @@
-import argparse
 import os
 from pathlib import Path
 from typing import Dict, List
 
+import fire
 import yaml
 from torchic.nn import NeuralNetwork
 
@@ -18,15 +18,12 @@ def parse_specification(file: Path) -> Dict:
     return yaml.load(open(file), Loader=yaml.FullLoader)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--spec-file", type=Path, required=True, help="Path to specification file")
-    args = parser.parse_args()
+def main(spec_file: Path, population: int = 30, seed: int = 0):
+    spec_file = Path(spec_file).resolve()
+    if not spec_file.is_file():
+        raise FileNotFoundError(f"File not found: {spec_file}")
 
-    if not args.spec_file.is_file():
-        raise FileNotFoundError(f"File not found: {args.spec_file}")
-
-    spec_file_path: Path = args.spec_file.resolve()
+    spec_file_path: Path = spec_file.resolve()
     spec_file_dir: Path = spec_file_path.parent
     print(f"Reading from: {spec_file_path}")
 
@@ -36,15 +33,19 @@ def main():
     learnables: List[Learnable] = get_learnables(specification)
     knowledge: List[Rule] = get_knowledge(specification)
     constraints: List[Constraint] = get_constraints(specification)
-    trained_models: List[NeuralNetwork] = start_training(
-        datasets, optimization, learnables, knowledge, constraints
-    )
-    for learnable, model in zip(learnables, trained_models):
-        relative_path = specification["learnable"][learnable.name]["destination"]
-        dest_path = spec_file_dir / relative_path / f"{learnable.name}.pth"
-        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-        model.save(dest_path)
+
+    for i in range(population):
+        current_seed = seed + i
+        print(f"Training iteration {i + 1}/{population} with seed {current_seed}")
+        trained_models: List[NeuralNetwork] = start_training(
+            datasets, optimization, learnables, knowledge, constraints, seed=current_seed
+        )
+        for learnable, model in zip(learnables, trained_models):
+            relative_path = specification["learnable"][learnable.name]["destination"]
+            dest_path = spec_file_dir / relative_path / f"{learnable.name}_seed_{current_seed}.pth"
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            model.save(dest_path)
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
