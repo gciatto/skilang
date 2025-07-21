@@ -19,7 +19,7 @@ def load_model(name: str) -> NeuralNetwork:
         .add_linear(64, 64)
         .add_layer(torch.nn.ReLU())
         .add_linear(64, 2)
-        .add_layer(torch.nn.Softmax())
+        .add_layer(torch.nn.Softmax(dim=1))
     ).build()
     model.load(model_path)
 

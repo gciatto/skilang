@@ -73,7 +73,7 @@ learnable:
     outputs:
       - source: features.income
         transform: ordinal
-    type: neural_network # TODO: inconsistent with code
+    type: neural_network
     layers:
       - linear:
           input: 9
