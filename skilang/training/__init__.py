@@ -1,10 +1,14 @@
 from typing import List, Dict, Callable, Any
 
+import mlflow
+import numpy as np
 import torch
+from mlflow.models import infer_signature
 from torch import Tensor
 from torch.utils.data import DataLoader
 from torchic.nn import NeuralNetwork
 
+from skilang import logger
 from skilang.specification.constraints import Constraint, ConstraintType
 from skilang.specification.data import Dataset
 from skilang.specification.knowledge import Rule, get_rules_assignments
@@ -93,9 +97,39 @@ def train_torch_model(
     loss = get_torch_loss(optimization.loss)
     optimizer = get_torch_optimizer(optimization.optimizer, model.parameters(), optimization.learning_rate)
     epochs = optimization.epochs
-    ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
+    with mlflow.start_run() as run:
+        params = {
+            "epochs": epochs,
+            "learning_rate": optimization.learning_rate,
+            "batch_size": next(iter(train_loader))[0].shape[0],
+            "loss_function": loss.__class__.__name__,
+            "optimizer": optimization.optimizer.name,
+        }
+        # Log training parameters.
+        mlflow.log_params(params)
+        # mlflow.log_artifact(f"{model_name}_{seed}.txt")
 
-    # model.plot_loss()
+        input_tensor_example: Tensor = next(iter(test_loader))[0][0, :].reshape(1, -1)
+        input_example: np.ndarray = input_tensor_example.numpy()
+        output_example = model.inference(input_tensor_example).tensor.cpu().numpy()
+        signature = infer_signature(input_example, output_example)
+
+        ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
+
+        # model.plot_loss()
+
+        model_info = mlflow.pytorch.log_model(
+            model, name=f"{model_name}_{seed}", signature=signature, input_example=input_example
+        )
+        logger.info(f"Model info: {model_info}")
+
+    # client = MlflowClient()
+    # client.create_registered_model(f"{model_name}_{seed}")
+    # desc = "A new version of the model"
+    # runs_uri = f"runs:/{run.info.run_id}/sklearn-model"
+    # model_src = RunsArtifactRepository.get_underlying_uri(runs_uri)
+    # mv = client.create_model_version(f"{model_name}_{seed}", model_src, run.info.run_id, description=desc)
+
     return model
 
 

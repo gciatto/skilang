@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/c24309a9b395402e8adcf21b847f7011/artifacts
+end_time: 1761834780779
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c24309a9b395402e8adcf21b847f7011
+run_name: useful-fox-776
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761834713692
+status: 3
+tags: []
+user_id: mattia

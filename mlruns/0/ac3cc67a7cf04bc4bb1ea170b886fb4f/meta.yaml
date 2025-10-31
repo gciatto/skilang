@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/ac3cc67a7cf04bc4bb1ea170b886fb4f/artifacts
+end_time: 1761824849787
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: ac3cc67a7cf04bc4bb1ea170b886fb4f
+run_name: puzzled-gnat-682
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761824832841
+status: 4
+tags: []
+user_id: mattia

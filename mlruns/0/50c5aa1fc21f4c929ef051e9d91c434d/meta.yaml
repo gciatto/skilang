@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/50c5aa1fc21f4c929ef051e9d91c434d/artifacts
+deleted_time: 1761822371179
+end_time: 1761822136673
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+run_id: 50c5aa1fc21f4c929ef051e9d91c434d
+run_name: capricious-mink-478
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761822064073
+status: 3
+tags: []
+user_id: mattia

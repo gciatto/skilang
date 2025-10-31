@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/c3fdc4acf4c744d1957cfb5784847fd9/artifacts
+end_time: 1761834283569
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c3fdc4acf4c744d1957cfb5784847fd9
+run_name: delightful-croc-173
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761834283551
+status: 4
+tags: []
+user_id: mattia

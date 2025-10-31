@@ -1,0 +1,10 @@
+artifact_location: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/models/m-28bf6a272a714864811a9067a6bf35f6/artifacts
+creation_timestamp: 1761822487419
+experiment_id: '0'
+last_updated_timestamp: 1761822489925
+model_id: m-28bf6a272a714864811a9067a6bf35f6
+model_type: null
+name: over50k_0
+source_run_id: c3d1360884a348faa2a98ae0def3a0d6
+status: 2
+status_message: null

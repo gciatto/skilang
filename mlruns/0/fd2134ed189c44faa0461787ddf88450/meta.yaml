@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/fd2134ed189c44faa0461787ddf88450/artifacts
+deleted_time: 1761822371217
+end_time: 1761739671433
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+run_id: fd2134ed189c44faa0461787ddf88450
+run_name: fun-grub-401
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761739607532
+status: 3
+tags: []
+user_id: mattia

@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/abcb631dd01f46418db6290a05de6273/artifacts
+end_time: 1761834635089
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: abcb631dd01f46418db6290a05de6273
+run_name: chill-kit-321
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761834635067
+status: 4
+tags: []
+user_id: mattia

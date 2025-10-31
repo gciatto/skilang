@@ -1,0 +1,10 @@
+artifact_location: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/models/m-b01be5b5829c4ff880ed4cd61069832a/artifacts
+creation_timestamp: 1761739990701
+experiment_id: '0'
+last_updated_timestamp: 1761739993063
+model_id: m-b01be5b5829c4ff880ed4cd61069832a
+model_type: null
+name: model
+source_run_id: 3be4f52375bf473c8b204b2f8edb5d83
+status: 2
+status_message: null

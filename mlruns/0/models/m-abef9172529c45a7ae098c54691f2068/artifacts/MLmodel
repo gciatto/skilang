@@ -1,0 +1,23 @@
+artifact_path: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/models/m-abef9172529c45a7ae098c54691f2068/artifacts
+flavors:
+  python_function:
+    config:
+      device: null
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.10.9
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 2.7.1
+mlflow_version: 3.5.0
+model_id: m-abef9172529c45a7ae098c54691f2068
+model_size_bytes: 25689
+model_uuid: m-abef9172529c45a7ae098c54691f2068
+prompts: null
+run_id: e4848f89158a4086b1287efff922fb3b
+utc_time_created: '2025-10-29 12:17:29.217135'

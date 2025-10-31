@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/c98060ba54fc46159b100d381a1a9a0c/artifacts
+end_time: 1761825223498
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c98060ba54fc46159b100d381a1a9a0c
+run_name: glamorous-crab-542
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761825090361
+status: 4
+tags: []
+user_id: mattia

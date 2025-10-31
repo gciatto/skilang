@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/3be4f52375bf473c8b204b2f8edb5d83/artifacts
+deleted_time: 1761822371211
+end_time: 1761739993064
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+run_id: 3be4f52375bf473c8b204b2f8edb5d83
+run_name: merciful-jay-856
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761739928955
+status: 3
+tags: []
+user_id: mattia

@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/mattia/Desktop/Research/skilang/mlruns/0/249b6aae8b9643a8be365ed79d4804e7/artifacts
+end_time: 1761824890831
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 249b6aae8b9643a8be365ed79d4804e7
+run_name: likeable-asp-255
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761824886009
+status: 4
+tags: []
+user_id: mattia
