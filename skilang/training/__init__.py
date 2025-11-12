@@ -9,7 +9,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from torchic.nn import NeuralNetwork
 from torchic.utils import get_current_device
-from torchmetrics import Metric, Accuracy, F1Score, Recall
+from torchmetrics import Metric, Accuracy, Recall
 
 from skilang.specification.constraints import Constraint, ConstraintType
 from skilang.specification.data import Dataset
@@ -118,18 +118,17 @@ def train_torch_model(
     mlflow.config.enable_system_metrics_logging()
     mlflow.config.set_system_metrics_sampling_interval(5)
 
-    with mlflow.start_run() as run:
+    with mlflow.start_run():
         trainer.fit(ski_model, train_loader, test_loader)
         input_tensor_example: Tensor = next(iter(test_loader))[0][0, :].reshape(1, -1)
         input_example: np.ndarray = input_tensor_example.numpy()
         output_example = model.inference(input_tensor_example).tensor.cpu().numpy()
         signature = infer_signature(input_example, output_example)
         model_info = mlflow.pytorch.log_model(
-            model,
-            name=f"{model_name}_{seed}",  # signature=signature, input_example=input_example
+            model, name=f"{model_name}_{seed}", signature=signature, input_example=input_example
         )
         model_uri = model_info.model_uri
-        print(model_info)
+        print(model_info, model_uri)
 
         # model_uri = "models:/m-792f9aafce7142cd8cab79c1e94d0f3d"
         # test_dataset = dataset.test.astype({col: 'float32' for col in dataset.test.select_dtypes(include=['float64']).columns})

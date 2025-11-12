@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Dict
 
 import lightning as L
 import mlflow
@@ -6,7 +6,7 @@ import torch
 from torch import Tensor
 from torch.optim.optimizer import Optimizer as TorchOptimizer
 from torchic.nn import NeuralNetwork
-from torchmetrics import Accuracy, F1Score, Metric
+from torchmetrics import Metric
 from typing import List
 
 
@@ -50,7 +50,7 @@ class InjectedNN(L.LightningModule):
             loss = loss.mean()
 
         for metric_fn in self.metrics:
-            metric = metric_fn.update(pred, target)
+            metric_fn.update(pred, target)
 
         log_dict: Dict = {"train_injected_loss": modified_loss, "train_raw_loss": loss}
         self.log_dict(log_dict, on_step=False, on_epoch=True, prog_bar=True, logger=True)
