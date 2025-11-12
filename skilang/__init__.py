@@ -281,7 +281,7 @@ class Expression(Formula, ArgsMixin):
                     args = tuple(
                         [arg.evaluate(**kwargs) if isinstance(arg, Formula) else arg for arg in second_arg]
                     )
-                if isinstance(args, int) or isinstance(args[1], int):
+                if isinstance(args, int) or isinstance(args, slice) or isinstance(args[1], int):
                     return first_arg[args]  # type: ignore[index]
                 else:
                     return first_arg[args[1]]  # type: ignore[index]
