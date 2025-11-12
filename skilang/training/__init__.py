@@ -3,12 +3,14 @@ from typing import List, Dict, Callable, Any
 import mlflow
 import numpy as np
 import torch
+from lightning.pytorch import Trainer, seed_everything
 from mlflow.models import infer_signature
 from torch import Tensor
 from torch.utils.data import DataLoader
 from torchic.nn import NeuralNetwork
+from torchic.utils import get_current_device
+from torchmetrics import Metric, Accuracy, F1Score, Recall
 
-from skilang import logger
 from skilang.specification.constraints import Constraint, ConstraintType
 from skilang.specification.data import Dataset
 from skilang.specification.knowledge import Rule, get_rules_assignments
@@ -18,7 +20,7 @@ from skilang.specification.learnable.impl import create_torch_model, create_torc
 from skilang.specification.optimization import Optimization
 from skilang.specification.optimization.impl import get_torch_loss, get_torch_optimizer
 from skilang.training.encodings import encode_dataset
-from skilang.training.skitrainer import SkiTrainer
+from skilang.training.injectednn import InjectedNN
 
 
 def start_training(
@@ -88,49 +90,58 @@ def train_torch_model(
     target_name: str = target_names[0]
     instance_name: str = dataset.instance_name
 
-    ski_trainer = SkiTrainer(
-        model,
-        create_regularization_fn(
-            model_name, instance_name, target_name, knowledge, constraints, dataset_assignments
-        ),
-    )
     loss = get_torch_loss(optimization.loss)
     optimizer = get_torch_optimizer(optimization.optimizer, model.parameters(), optimization.learning_rate)
     epochs = optimization.epochs
-    with mlflow.start_run() as run:
-        params = {
-            "epochs": epochs,
-            "learning_rate": optimization.learning_rate,
-            "batch_size": next(iter(train_loader))[0].shape[0],
-            "loss_function": loss.__class__.__name__,
-            "optimizer": optimization.optimizer.name,
-        }
-        # Log training parameters.
-        mlflow.log_params(params)
-        # mlflow.log_artifact(f"{model_name}_{seed}.txt")
+    regularization_fn = create_regularization_fn(
+        model_name, instance_name, target_name, knowledge, constraints, dataset_assignments
+    )
 
+    # find distinct value in dataset.targets
+    target_values = set(dataset.targets[0].values.values())
+    num_classes: int = len(target_values)
+
+    metrics: List[Metric] = [
+        Recall(task="multiclass", num_classes=num_classes).to(get_current_device()),
+        Accuracy(task="multiclass", num_classes=num_classes).to(get_current_device()),
+        # F1Score(task="multiclass", num_classes=num_classes).to(get_current_device()),
+    ]
+
+    ski_model = InjectedNN(model, loss, optimizer, regularization_fn, metrics)
+
+    # sets seeds for numpy, torch and python.random.
+    seed_everything(seed, workers=True)
+    trainer = Trainer(deterministic=True, max_epochs=epochs)
+
+    mlflow.pytorch.autolog(log_models=False)
+    mlflow.set_experiment(model_name)
+    mlflow.config.enable_system_metrics_logging()
+    mlflow.config.set_system_metrics_sampling_interval(5)
+
+    with mlflow.start_run() as run:
+        trainer.fit(ski_model, train_loader, test_loader)
         input_tensor_example: Tensor = next(iter(test_loader))[0][0, :].reshape(1, -1)
         input_example: np.ndarray = input_tensor_example.numpy()
         output_example = model.inference(input_tensor_example).tensor.cpu().numpy()
         signature = infer_signature(input_example, output_example)
-
-        ski_trainer.fit(train_loader, test_loader, loss, optimizer, epochs=epochs)
-
-        # model.plot_loss()
-
         model_info = mlflow.pytorch.log_model(
-            model, name=f"{model_name}_{seed}", signature=signature, input_example=input_example
+            model,
+            name=f"{model_name}_{seed}",  # signature=signature, input_example=input_example
         )
-        logger.info(f"Model info: {model_info}")
+        model_uri = model_info.model_uri
+        print(model_info)
 
-    # client = MlflowClient()
-    # client.create_registered_model(f"{model_name}_{seed}")
-    # desc = "A new version of the model"
-    # runs_uri = f"runs:/{run.info.run_id}/sklearn-model"
-    # model_src = RunsArtifactRepository.get_underlying_uri(runs_uri)
-    # mv = client.create_model_version(f"{model_name}_{seed}", model_src, run.info.run_id, description=desc)
+        # model_uri = "models:/m-792f9aafce7142cd8cab79c1e94d0f3d"
+        # test_dataset = dataset.test.astype({col: 'float32' for col in dataset.test.select_dtypes(include=['float64']).columns})
+        # result = mlflow.models.evaluate(
+        #     model_uri,
+        #     test_dataset,
+        #     targets=target_name,
+        #     model_type="classifier",
+        #     evaluators=["default"],
+        # )
 
-    return model
+    return ski_model.model
 
 
 def create_regularization_fn(
