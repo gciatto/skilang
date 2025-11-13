@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -6,6 +5,7 @@ import fire
 import yaml
 from torchic.nn import NeuralNetwork
 
+from skilang import logger
 from skilang.specification.constraints import Constraint, get_constraints
 from skilang.specification.data import Dataset, get_datasets
 from skilang.specification.knowledge import get_knowledge, Rule
@@ -40,11 +40,7 @@ def main(spec_file: Path, population: int = 30, seed: int = 0):
         trained_models: List[NeuralNetwork] = start_training(
             datasets, optimization, learnables, knowledge, constraints, seed=current_seed
         )
-        for learnable, model in zip(learnables, trained_models):
-            relative_path = specification["learnable"][learnable.name]["destination"]
-            dest_path = spec_file_dir / relative_path / f"{learnable.name}_seed_{current_seed}.pth"
-            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-            model.save(dest_path)
+        logger.info(f"Trained models: {trained_models}")
 
 
 if __name__ == "__main__":

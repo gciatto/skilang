@@ -1,3 +1,4 @@
+import os
 from typing import List, Dict, Callable, Any
 
 import mlflow
@@ -9,6 +10,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from torchic.nn import NeuralNetwork
 from torchic.utils import get_current_device
+from torchinfo import summary
 from torchmetrics import Metric, Accuracy, Recall
 
 from skilang.specification.constraints import Constraint, ConstraintType
@@ -118,27 +120,29 @@ def train_torch_model(
     mlflow.config.enable_system_metrics_logging()
     mlflow.config.set_system_metrics_sampling_interval(5)
 
-    with mlflow.start_run():
+    with mlflow.start_run() as run:
         trainer.fit(ski_model, train_loader, test_loader)
-        input_tensor_example: Tensor = next(iter(test_loader))[0][0, :].reshape(1, -1)
-        input_example: np.ndarray = input_tensor_example.numpy()
-        output_example = model.inference(input_tensor_example).tensor.cpu().numpy()
+        tensor_example: Tensor = next(iter(test_loader))[0][0, :]
+        column_tensor_example: Tensor = tensor_example.reshape(1, -1)
+        input_example: np.ndarray = column_tensor_example.numpy()
+        output_example = model.inference(column_tensor_example).tensor.cpu().numpy()
         signature = infer_signature(input_example, output_example)
         model_info = mlflow.pytorch.log_model(
-            model, name=f"{model_name}_{seed}", signature=signature, input_example=input_example
+            model, name=f"{run.info.run_name}_model_{seed}", signature=signature, input_example=input_example
         )
         model_uri = model_info.model_uri
-        print(model_info, model_uri)
+        # print(model_info)
+        with open("model_summary.txt", "w") as f:
+            f.write(str(summary(model)))
+        mlflow.log_artifact("model_summary.txt")
+        os.remove("model_summary.txt")
 
-        # model_uri = "models:/m-792f9aafce7142cd8cab79c1e94d0f3d"
-        # test_dataset = dataset.test.astype({col: 'float32' for col in dataset.test.select_dtypes(include=['float64']).columns})
-        # result = mlflow.models.evaluate(
-        #     model_uri,
-        #     test_dataset,
-        #     targets=target_name,
-        #     model_type="classifier",
-        #     evaluators=["default"],
-        # )
+        # Load and use the model
+        loaded_model = mlflow.pyfunc.load_model(model_uri)
+
+        # Make predictions
+        predictions = loaded_model.predict(input_example)
+        print("Predictions:", predictions)
 
     return ski_model.model
 
