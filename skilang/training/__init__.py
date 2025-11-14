@@ -7,7 +7,6 @@ import torch
 from lightning.pytorch import Trainer, seed_everything
 from mlflow.models import infer_signature
 from torch import Tensor
-from torch.utils.data import DataLoader
 from torchic.nn import NeuralNetwork
 from torchic.utils import get_current_device
 from torchinfo import summary
@@ -15,12 +14,13 @@ from torchmetrics import Metric, Accuracy, Recall
 
 from skilang.specification.constraints import Constraint, ConstraintType
 from skilang.specification.data import Dataset
+from skilang.specification.data.impl.torch import DataModule
 from skilang.specification.knowledge import Rule, get_rules_assignments
 from skilang.specification.learnable import Learnable, Backend
 from skilang.specification.learnable.enum import EncodingType
-from skilang.specification.learnable.impl import create_torch_model, create_torch_dataloader
+from skilang.specification.learnable.impl.torch import create_torch_model
 from skilang.specification.optimization import Optimization
-from skilang.specification.optimization.impl import get_torch_loss, get_torch_optimizer
+from skilang.specification.optimization.impl.torch import get_torch_loss, get_torch_optimizer
 from skilang.training.encodings import encode_dataset
 from skilang.training.injectednn import InjectedNN
 
@@ -70,9 +70,7 @@ def train_torch_model(
     if len(encodings) != 0:
         dataset, mappings = encode_dataset(dataset, encodings)
 
-    train_loader: DataLoader = create_torch_dataloader(dataset.training, optimization.batch_size)
-    test_loader: DataLoader = create_torch_dataloader(dataset.test, optimization.batch_size)
-
+    datamodule: DataModule = DataModule(dataset, optimization.batch_size)
     dataset_assignments: Dict[str, float] = {}
 
     if len(mappings) != 0:
@@ -121,8 +119,8 @@ def train_torch_model(
     mlflow.config.set_system_metrics_sampling_interval(5)
 
     with mlflow.start_run() as run:
-        trainer.fit(ski_model, train_loader, test_loader)
-        tensor_example: Tensor = next(iter(test_loader))[0][0, :]
+        trainer.fit(ski_model, datamodule=datamodule)
+        tensor_example: Tensor = next(iter(datamodule.val_dataloader()))[0][0, :]
         column_tensor_example: Tensor = tensor_example.reshape(1, -1)
         input_example: np.ndarray = column_tensor_example.numpy()
         output_example = model.inference(column_tensor_example).tensor.cpu().numpy()
