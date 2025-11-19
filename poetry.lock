@@ -4200,14 +4200,14 @@ test = ["cloudpickle (>=1.3)", "coverage (==7.10.6)", "fastapi", "numpy (>1.20.0
 
 [[package]]
 name = "pytorchic"
-version = "4.0.2"
+version = "5.1.0"
 description = "A framework for instantly building flexible PyTorch models."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "pytorchic-4.0.2-py3-none-any.whl", hash = "sha256:183dc11f5b3fb1596e7d477a3950396f196489e5ea336af855a9b078dc1f5a67"},
-    {file = "pytorchic-4.0.2.tar.gz", hash = "sha256:d9fa7dfff223603ca16b1ab9a4b5a7bec1436b47e41f4836a4f8c5490f4526f9"},
+    {file = "pytorchic-5.1.0-py3-none-any.whl", hash = "sha256:fb7976121bc00bc929da298a688f3cf01e0308e0683f9736763a95355bc5f2d9"},
+    {file = "pytorchic-5.1.0.tar.gz", hash = "sha256:19d30e072a531386ff6a7f1dd3dbfb38c10c052c64e6925f399014c2f96c913f"},
 ]
 
 [package.dependencies]
@@ -5677,4 +5677,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.10.0 < 3.13.0"
-content-hash = "96d87147bec289c18f190820fab7f6765f3a72525c937ac42e85b215bda545e6"
+content-hash = "8fcd22d1a68fcd07ac214bd8b973bfd0c3c17264fb1f961cca52f5b5e3285692"
