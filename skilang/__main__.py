@@ -12,6 +12,7 @@ from skilang.specification.knowledge import get_knowledge, Rule
 from skilang.specification.learnable import get_learnables, Learnable
 from skilang.specification.optimization import Optimization, get_optimization
 from skilang.training import start_training
+from skilang.utils.env import load_env_vars
 
 
 def parse_specification(file: Path) -> Dict:
@@ -19,6 +20,7 @@ def parse_specification(file: Path) -> Dict:
 
 
 def main(spec_file: Path, population: int = 30, seed: int = 0):
+    load_env_vars()
     spec_file = Path(spec_file).resolve()
     if not spec_file.is_file():
         raise FileNotFoundError(f"File not found: {spec_file}")
