@@ -3140,18 +3140,6 @@ files = [
 
 [[package]]
 name = "nvidia-cublas"
-version = "13.1.0.3"
-description = "CUBLAS native runtime libraries"
-optional = false
-python-versions = ">=3"
-files = [
-    {file = "nvidia_cublas-13.1.0.3-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:c86fc7f7ae36d7528288c5d88098edcb7b02c633d262e7ddbb86b0ad91be5df2"},
-    {file = "nvidia_cublas-13.1.0.3-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:ee8722c1f0145ab246bccb9e452153b5e0515fd094c3678df50b2a0888b8b171"},
-    {file = "nvidia_cublas-13.1.0.3-py3-none-win_amd64.whl", hash = "sha256:2a3b94a37def342471c59fad7856caee4926809a72dd5270155d6a31b5b277be"},
-]
-
-[[package]]
-name = "nvidia-cublas"
 version = "13.1.1.3"
 description = "CUBLAS native runtime libraries"
 optional = false
