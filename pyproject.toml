@@ -31,7 +31,7 @@ poethepoet = "^0.48.0"
 poetry = "^2.0.0"
 pytest = "^8.2.2"
 behave = "^1.2.6"
-ruff = "^0.11.5"
+ruff = "^0.16.0"
 types-pyyaml = "^6.0.12.20250402"
 types-requests = "^2.32.4.20250611"
 
